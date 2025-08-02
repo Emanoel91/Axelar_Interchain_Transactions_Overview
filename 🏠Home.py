@@ -2,8 +2,8 @@ import streamlit as st
 
 # --- Page Config: Tab Title & Icon ---
 st.set_page_config(
-    page_title="Squid: Chain Swaps",
-    page_icon="https://axelarscan.io/logos/accounts/squid.svg",
+    page_title="Axelar: Interchain Transactions Overview",
+    page_icon="https://img.cryptorank.io/coins/axelar1663924228506.png",
     layout="wide"
 )
 
@@ -11,8 +11,8 @@ st.set_page_config(
 st.markdown(
     """
     <div style="display: flex; align-items: center; gap: 15px;">
-        <img src="https://axelarscan.io/logos/accounts/squid.svg" alt="Squid Logo" style="width:60px; height:60px;">
-        <h1 style="margin: 0;">Squid: Chain Swaps</h1>
+        <img src="https://img.cryptorank.io/coins/axelar1663924228506.png" alt="Axelar Logo" style="width:60px; height:60px;">
+        <h1 style="margin: 0;">Axelar: Interchain Transactions Overview</h1>
     </div>
     """,
     unsafe_allow_html=True
@@ -22,9 +22,14 @@ st.markdown(
 st.markdown(
     """
     <div style="background-color: #e6fa36; padding: 15px; border-radius: 10px; border: 1px solid #ffd700;">
-        Squid Router is a cross-chain liquidity and messaging protocol built on the Axelar Network, designed to facilitate seamless token swaps, 
-        transfers, and smart contract interactions across multiple blockchains. 
-        Squid enables users to swap any token across over 90 blockchains (e.g., Ethereum, Polygon, Arbitrum, Solana, Bitcoin) in a single click.
+        Axelar facilitates secure cross-chain communication within the Web3 ecosystem. It empowers dApp users to seamlessly engage with any 
+        asset or application across multiple chains with a single click. Currently, Axelar supports 50 different chains.
+        Interchain dApps like Prime Protocol and Mint DAO utilize Axelar's capabilities to offer cross-chain services to users, while other 
+        protocols like Squid and Satellite, also powered by Axelar, facilitate cross-chain swaps among these 50 chains.
+        Axelar's journey began with interchain transfers, primarily introduced through Satellite. In the summer of 2022, the utilization of 
+        GMPs (General Message Passing) was introduced by Squid and other dApps such as Prime Protocol and MintDAO. This dashboard aims to provide 
+        an overview of Axelar's evolution by distinguishing between Interchain Transfers and GMPs. It also offers a comprehensive overview of Squid 
+        and Satellite, two major protocols powered by Axelar.
     </div>
     """,
     unsafe_allow_html=True
@@ -36,7 +41,7 @@ st.markdown(
     <div style="margin-top: 20px; margin-bottom: 20px; font-size: 16px;">
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
             <img src="https://cdn-icons-png.flaticon.com/512/3178/3178287.png" alt="Reference" style="width:20px; height:20px;">
-            <span>Dashboard Reference: <a href="https://flipsidecrypto.xyz/Sniper/squid-chain-swaps-FXyjqK" target="_blank">https://flipsidecrypto.xyz/Sniper/squid-chain-swaps-FXyjqK/</a></span>
+            <span>Dashboard Reference: <a href="https://flipsidecrypto.xyz/SocioAnalytica/axelar-interchain-transactions-overview-49M0W3" target="_blank">https://flipsidecrypto.xyz/SocioAnalytica/axelar-interchain-transactions-overview-49M0W3</a></span>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
             <img src="https://pbs.twimg.com/profile_images/1841479747332608000/bindDGZQ_400x400.jpg" alt="Eman Raz" style="width:25px; height:25px; border-radius: 50%;">
@@ -60,17 +65,10 @@ st.markdown(
             <a href="https://www.axelar.network/" target="_blank">https://www.axelar.network/</a>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="https://axelarscan.io/logos/accounts/squid.svg" alt="Squid" style="width:20px; height:20px;">
-            <a href="https://www.squidrouter.com/" target="_blank">https://www.squidrouter.com/</a>
-        </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
             <img src="https://cdn-icons-png.flaticon.com/512/5968/5968958.png" alt="X" style="width:20px; height:20px;">
             <a href="https://x.com/axelar" target="_blank">https://x.com/axelar</a>
         </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="https://cdn-icons-png.flaticon.com/512/5968/5968958.png" alt="X" style="width:20px; height:20px;">
-            <a href="https://x.com/squidrouter" target="_blank">https://x.com/squidrouter</a>
-        </div>
+        
     </div>
     """,
     unsafe_allow_html=True
