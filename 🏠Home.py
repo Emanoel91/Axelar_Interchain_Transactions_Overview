@@ -39,7 +39,7 @@ st.markdown(
         Introduction
     </div>
 
-    <div style="background-color: #8cfffb; padding: 15px; border-radius: 10px; border: 1px solid #8cfffb;">
+    <div style="background-color: #b3fbc7; padding: 15px; border-radius: 10px; border: 1px solid #b3fbc7;">
         Axelar facilitates secure cross-chain communication within the Web3 ecosystem. It empowers dApp users to seamlessly engage with any 
         asset or application across multiple chains with a single click. Currently, Axelar supports 50 different chains.
         Interchain dApps like Prime Protocol and Mint DAO utilize Axelar's capabilities to offer cross-chain services to users, while other 
