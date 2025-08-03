@@ -35,6 +35,10 @@ st.markdown(
 # --- Info Box ---
 st.markdown(
     """
+    <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">
+        Intro
+    </div>
+
     <div style="background-color: #e6fa36; padding: 15px; border-radius: 10px; border: 1px solid #ffd700;">
         Axelar facilitates secure cross-chain communication within the Web3 ecosystem. It empowers dApp users to seamlessly engage with any 
         asset or application across multiple chains with a single click. Currently, Axelar supports 50 different chains.
