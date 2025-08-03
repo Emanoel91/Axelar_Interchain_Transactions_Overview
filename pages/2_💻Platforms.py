@@ -1,38 +1,23 @@
 import streamlit as st
 import pandas as pd
 import requests
-import snowflake.connector
 import plotly.express as px
-import plotly.graph_objects as go
 
-# --- Page Config: Tab Title & Icon -------------------------------------------------------------------------------------
+# --- Page Config ---
 st.set_page_config(
     page_title="Axelar : Interchain Transactions Overview",
     page_icon="https://img.cryptorank.io/coins/axelar1663924228506.png",
     layout="wide"
 )
 
-# --- Title & Info Messages ---------------------------------------------------------------------------------------------
-st.title("💻Platforms Powered By Axelar")
+st.title("💻 Platforms Powered By Axelar")
 st.info("📊 Charts initially display data for a default time range. Select a custom range to view results for your desired period.")
 st.info("⏳ On-chain data retrieval may take a few moments. Please wait while the results load.")
 
-# --- Snowflake Connection ----------------------------------------------------------------------------------------------
-conn = snowflake.connector.connect(
-    user=st.secrets["snowflake"]["user"],
-    password=st.secrets["snowflake"]["password"],
-    account=st.secrets["snowflake"]["account"],
-    warehouse="SNOWFLAKE_LEARNING_WH",
-    database="AXELAR",
-    schema="PUBLIC"
-)
-
-# --- Time Frame & Period Selection --------------------------------------------------------------------------------------
 timeframe = st.selectbox("Select Time Frame", ["month", "week", "day"])
 start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 
-# --- reding data from Dune API -----------------------------------------------------------------------------------------------
 @st.cache_data(ttl=600)
 def load_data():
     url = "https://api.dune.com/api/v1/query/5575605/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
@@ -46,27 +31,35 @@ def load_data():
     if 'date' not in df.columns:
         st.error("Column 'date' not found in data!")
         return pd.DataFrame()
-    df['date'] = pd.to_datetime(df['date'])
+    df['date'] = pd.to_datetime(df['date'], errors='coerce')
     return df
 
 df = load_data()
 
-df = df[(df['date'] >= pd.to_datetime(start_date)) & (df['date'] <= pd.to_datetime(end_date))]
+# تبدیل start_date و end_date به pd.Timestamp
+start_date = pd.Timestamp(start_date)
+end_date = pd.Timestamp(end_date)
+
+# فیلتر کردن دیتا بر اساس تاریخ
+df = df[(df['date'] >= start_date) & (df['date'] <= end_date)]
 
 def resample_df(df, timeframe):
     if timeframe == "day":
         df_resampled = df.copy()
     else:
-        df['period'] = df['date'].dt.to_period(timeframe[0].upper()).dt.start_time
+        freq_map = {"week": "W", "month": "M"}
+        freq = freq_map.get(timeframe, "D")  # Default day if not found
+        df['period'] = df['date'].dt.to_period(freq).dt.start_time
         df_resampled = df.groupby(['period', 'platform']).agg({
             'num_txs': 'sum',
             'volume': 'sum'
         }).reset_index()
-        df_resampled.rename(columns={'period':'date'}, inplace=True)
+        df_resampled.rename(columns={'period': 'date'}, inplace=True)
     return df_resampled
 
 df_resampled = resample_df(df, timeframe)
 
+# ردیف اول: دو stacked bar chart
 col1, col2 = st.columns(2)
 
 with col1:
@@ -95,6 +88,7 @@ with col2:
     fig2.update_layout(xaxis_title='Date', yaxis_title='Transaction Volume')
     st.plotly_chart(fig2, use_container_width=True)
 
+# ردیف دوم: دو نمودار خطی تجمعی
 df_resampled = df_resampled.sort_values('date')
 df_resampled['cumulative_num_txs'] = df_resampled.groupby('platform')['num_txs'].cumsum()
 df_resampled['cumulative_volume'] = df_resampled.groupby('platform')['volume'].cumsum()
@@ -123,6 +117,7 @@ with col4:
     )
     st.plotly_chart(fig4, use_container_width=True)
 
+# ردیف سوم: دو bar chart مجموع کل برای هر پلتفرم با مقدار روی ستون‌ها
 df_total = df.groupby('platform').agg({
     'num_txs': 'sum',
     'volume': 'sum'
