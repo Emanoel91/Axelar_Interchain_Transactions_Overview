@@ -345,7 +345,7 @@ else:
 st.subheader("📌 User Summary KPIs")
 
 @st.cache_data(ttl=3600)
-def load_user_kpis(start_date, end_date, time_frame):
+def load_user_kpis(start_date, end_date):
     query = f"""
     WITH table1 AS (
         WITH axelar_services AS (
@@ -369,7 +369,7 @@ def load_user_kpis(start_date, end_date, time_frame):
         )
 
         SELECT 
-            DATE_TRUNC('{timeframe}', created_at) AS "Date",
+            DATE_TRUNC('day', created_at) AS "Date",
             COUNT(DISTINCT user) AS "AU",
             ROUND(AVG(COUNT(DISTINCT user)) OVER (ORDER BY DATE_TRUNC('day', created_at) ROWS BETWEEN 7 PRECEDING AND CURRENT ROW)) AS "Average 7 AU",
             ROUND(AVG(COUNT(DISTINCT user)) OVER (ORDER BY DATE_TRUNC('day', created_at) ROWS BETWEEN 30 PRECEDING AND CURRENT ROW)) AS "Average 30 AU"
@@ -411,7 +411,7 @@ def load_user_kpis(start_date, end_date, time_frame):
     return pd.read_sql(query, conn)
 
 # --- Load and Display KPIs ---
-user_kpis = load_user_kpis(start_date, end_date, time_frame)
+user_kpis = load_user_kpis(start_date, end_date)
 
 if not user_kpis.empty:
     total_users = int(user_kpis.loc[0, "Total Users"])
