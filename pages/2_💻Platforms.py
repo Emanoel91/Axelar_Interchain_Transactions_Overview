@@ -33,9 +33,9 @@ timeframe = st.selectbox("Select Time Frame", ["month", "week", "day"])
 start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 
-# --- Load Data from API ---
+# --- Load data from Dune API ---
 @st.cache_data(ttl=3600)
-def load_platform_data():
+def load_data():
     url = "https://api.dune.com/api/v1/query/5575605/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
     response = requests.get(url)
     if response.status_code == 200:
@@ -46,83 +46,103 @@ def load_platform_data():
         df["num_txs"] = pd.to_numeric(df["num_txs"], errors="coerce")
         return df
     else:
-        st.error(f"Failed to fetch data: {response.status_code}")
-        return pd.DataFrame(columns=["date", "volume", "num_txs", "platform"])
+        st.error(f"Failed to load data. Status code: {response.status_code}")
+        return pd.DataFrame(columns=["date", "platform", "volume", "num_txs"])
 
-# --- Load and Filter ---
-df_raw = load_platform_data()
-df_filtered = df_raw[
-    (df_raw["date"].dt.date >= start_date) &
-    (df_raw["date"].dt.date <= end_date)
+# --- Load & Filter ---
+df = load_data()
+
+# Filter by time period
+df = df[
+    (df["date"].dt.date >= start_date) &
+    (df["date"].dt.date <= end_date)
 ].copy()
 
-# --- Add Timeframe Column ---
-df_filtered["timeframe"] = df_filtered["date"].dt.to_period(timeframe[0].upper()).dt.to_timestamp()
+# Add timeframe column
+df["timeframe"] = df["date"].dt.to_period(timeframe[0].upper()).dt.to_timestamp()
 
-# --- Grouped Data ---
-grouped = df_filtered.groupby(["timeframe", "platform"]).agg({
+# --- Row 1: Stacked Bar Charts (per timeframe) ---
+st.subheader("📊 Transactions & Volume Over Time (by Platform)")
+
+# Group by timeframe and platform
+grouped = df.groupby(["timeframe", "platform"]).agg({
     "num_txs": "sum",
     "volume": "sum"
 }).reset_index()
 
-# --- Charts: Transactions Over Time ---
-st.subheader("📊 Transactions Over Time by Platform")
 col1, col2 = st.columns(2)
 
-fig_txs = px.bar(grouped, x="timeframe", y="num_txs", color="platform", title="Total Transactions")
-fig_txs_norm = px.bar(grouped, x="timeframe", y="num_txs", color="platform",
-                      title="Normalized Transactions", barmode="stack")
-fig_txs_norm.update_layout(barnorm="percent")
-
+# Transactions
+fig_txs = px.bar(
+    grouped, x="timeframe", y="num_txs", color="platform",
+    title="Stacked Transactions Over Time", barmode="stack"
+)
 col1.plotly_chart(fig_txs, use_container_width=True)
-col2.plotly_chart(fig_txs_norm, use_container_width=True)
 
-# --- Charts: Volume Over Time ---
-st.subheader("💰 Volume Over Time by Platform")
+# Volume
+fig_vol = px.bar(
+    grouped, x="timeframe", y="volume", color="platform",
+    title="Stacked Volume Over Time", barmode="stack"
+)
+col2.plotly_chart(fig_vol, use_container_width=True)
+
+# --- Row 2: Cumulative Line Charts ---
+st.subheader("📈 Cumulative Transactions & Volume Over Time")
+
+# Sort for cumulative sum
+df_sorted = df.sort_values(by=["platform", "timeframe"])
+
+# Cumulative sum
+df_sorted["cum_volume"] = df_sorted.groupby("platform")["volume"].cumsum()
+df_sorted["cum_txs"] = df_sorted.groupby("platform")["num_txs"].cumsum()
+
 col3, col4 = st.columns(2)
 
-fig_vol = px.bar(grouped, x="timeframe", y="volume", color="platform", title="Total Volume")
-fig_vol_norm = px.bar(grouped, x="timeframe", y="volume", color="platform",
-                      title="Normalized Volume", barmode="stack")
-fig_vol_norm.update_layout(barnorm="percent")
+# Cumulative volume
+fig_cum_vol = px.line(
+    df_sorted, x="timeframe", y="cum_volume", color="platform",
+    title="Cumulative Volume Over Time"
+)
+col3.plotly_chart(fig_cum_vol, use_container_width=True)
 
-col3.plotly_chart(fig_vol, use_container_width=True)
-col4.plotly_chart(fig_vol_norm, use_container_width=True)
+# Cumulative transactions
+fig_cum_txs = px.line(
+    df_sorted, x="timeframe", y="cum_txs", color="platform",
+    title="Cumulative Transactions Over Time"
+)
+col4.plotly_chart(fig_cum_txs, use_container_width=True)
 
-# --- Bar Charts: Total TXs & Volume by Platform ---
-st.subheader("📦 Total Transactions & Volume by Platform")
+# --- Row 3: Sorted Bar Charts (Total per Platform) ---
+st.subheader("📦 Total Transactions & Volume by Platform (Filtered by Time Period)")
 
-total_summary = df_filtered.groupby("platform").agg({
+# Aggregate total per platform
+total_by_platform = df.groupby("platform").agg({
     "num_txs": "sum",
     "volume": "sum"
 }).reset_index()
 
-# --- مرتب‌سازی بر اساس تعداد تراکنش ---
-total_txs_sorted = total_summary.sort_values(by="num_txs", ascending=False)
+# Sort
+total_txs_sorted = total_by_platform.sort_values(by="num_txs", ascending=False)
+total_vol_sorted = total_by_platform.sort_values(by="volume", ascending=False)
+
+col5, col6 = st.columns(2)
+
+# Bar chart: Total Transactions
 fig_total_txs = px.bar(
     total_txs_sorted,
-    x="platform",
-    y="num_txs",
-    text="num_txs",
-    color="platform",
-    title="Total Transactions per Platform"
+    x="platform", y="num_txs", text="num_txs",
+    color="platform", title="Total Transactions per Platform"
 )
 fig_total_txs.update_traces(textposition="outside")
 fig_total_txs.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+col5.plotly_chart(fig_total_txs, use_container_width=True)
 
-# --- مرتب‌سازی بر اساس حجم تراکنش ---
-total_vol_sorted = total_summary.sort_values(by="volume", ascending=False)
+# Bar chart: Total Volume
 fig_total_vol = px.bar(
     total_vol_sorted,
-    x="platform",
-    y="volume",
-    text="volume",
-    color="platform",
-    title="Total Volume per Platform"
+    x="platform", y="volume", text="volume",
+    color="platform", title="Total Volume per Platform"
 )
 fig_total_vol.update_traces(textposition="outside")
 fig_total_vol.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
-
-col5, col6 = st.columns(2)
-col5.plotly_chart(fig_total_txs, use_container_width=True)
 col6.plotly_chart(fig_total_vol, use_container_width=True)
