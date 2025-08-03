@@ -97,9 +97,10 @@ total_summary = df_filtered.groupby("platform").agg({
     "volume": "sum"
 }).reset_index()
 
-# --- Bar Chart: Total Transactions ---
+# --- مرتب‌سازی بر اساس تعداد تراکنش ---
+total_txs_sorted = total_summary.sort_values(by="num_txs", ascending=False)
 fig_total_txs = px.bar(
-    total_summary,
+    total_txs_sorted,
     x="platform",
     y="num_txs",
     text="num_txs",
@@ -109,9 +110,10 @@ fig_total_txs = px.bar(
 fig_total_txs.update_traces(textposition="outside")
 fig_total_txs.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
 
-# --- Bar Chart: Total Volume ---
+# --- مرتب‌سازی بر اساس حجم تراکنش ---
+total_vol_sorted = total_summary.sort_values(by="volume", ascending=False)
 fig_total_vol = px.bar(
-    total_summary,
+    total_vol_sorted,
     x="platform",
     y="volume",
     text="volume",
