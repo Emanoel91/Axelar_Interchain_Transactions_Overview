@@ -93,7 +93,6 @@ col1.plotly_chart(fig_txs, use_container_width=True)
 col2.plotly_chart(fig_txs_norm, use_container_width=True)
 
 # --- Row 3: Volume Over Time ---
-st.subheader("💰 Volume Over Time by Service")
 
 volume_grouped = service_df.groupby(["timeframe", "service"])["volume"].sum().reset_index()
 
@@ -113,7 +112,6 @@ col1.plotly_chart(fig_vol, use_container_width=True)
 col2.plotly_chart(fig_vol_norm, use_container_width=True)
 
 # --- Row 4: Donut Charts ---
-st.subheader("🥧 Service Share Distribution")
 
 total_txs_share = service_df.groupby("service")["num_txs"].sum().reset_index()
 total_vol_share = service_df.groupby("service")["volume"].sum().reset_index()
