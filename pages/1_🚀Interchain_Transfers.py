@@ -282,3 +282,61 @@ if not top_chains_df.empty:
         st.plotly_chart(fig_barh, use_container_width=True)
 else:
     st.warning("No source chain data found for the selected period.")
+
+# --- Row: Active Users Over Time ------------------------------------------------------------------------------------------------------------------------
+st.subheader("👥 Active Users and Averages Over Time")
+
+@st.cache_data(ttl=3600)
+def load_active_users(timeframe, start_date, end_date):
+    query = f"""
+    WITH axelar_services AS (
+        SELECT created_at,
+               sender_address AS user
+        FROM axelar.axelscan.fact_transfers
+        WHERE created_at::date >= '{start_date}'
+          AND created_at::date <= '{end_date}'
+          AND status = 'executed'
+          AND simplified_status = 'received'
+
+        UNION ALL
+
+        SELECT created_at,
+               TO_VARCHAR(data:call:transaction:from) AS user
+        FROM axelar.axelscan.fact_gmp
+        WHERE created_at::date >= '{start_date}'
+          AND created_at::date <= '{end_date}'
+          AND status = 'executed'
+          AND simplified_status = 'received'
+    )
+
+    SELECT 
+        DATE_TRUNC('{timeframe}', created_at) AS "Date",
+        COUNT(DISTINCT user) AS "AU",
+        ROUND(AVG(COUNT(DISTINCT user)) OVER (ORDER BY DATE_TRUNC('{timeframe}', created_at) ROWS BETWEEN 7 PRECEDING AND CURRENT ROW)) AS "Average 7 AU",
+        ROUND(AVG(COUNT(DISTINCT user)) OVER (ORDER BY DATE_TRUNC('{timeframe}', created_at) ROWS BETWEEN 30 PRECEDING AND CURRENT ROW)) AS "Average 30 AU"
+    FROM axelar_services
+    GROUP BY 1
+    ORDER BY 1
+    """
+    return pd.read_sql(query, conn)
+
+# --- Load Data ---
+df_au = load_active_users(timeframe, start_date, end_date)
+
+if not df_au.empty:
+    fig_au = px.line(
+        df_au,
+        x="Date",
+        y=["AU", "Average 7 AU", "Average 30 AU"],
+        title="D/W/MAU and Average 7/30 D/W/MAU",
+        markers=True
+    )
+    fig_au.update_layout(
+        yaxis_title="Active Users",
+        legend_title="Metric",
+        hovermode="x unified"
+    )
+    st.plotly_chart(fig_au, use_container_width=True)
+else:
+    st.warning("No active user data found for selected period.")
+
