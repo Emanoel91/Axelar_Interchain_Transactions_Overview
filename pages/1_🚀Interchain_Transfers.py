@@ -38,7 +38,7 @@ end_dt = pd.Timestamp(end_date)
 
 # --- API Data Load (Dune) ----------------------------------------------------------------------------------------------
 @st.cache_data(ttl=3600)
-def load_volume_data():
+def load_volume_data(start_date, end_date, time_frame):
     url = "https://api.dune.com/api/v1/query/5574227/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
     response = requests.get(url)
     if response.status_code == 200:
@@ -52,7 +52,7 @@ def load_volume_data():
         st.error(f"Failed to fetch volume data: {response.status_code}")
         return pd.DataFrame(columns=["day", "volume", "num_txs", "service"])
 
-volume_df = load_volume_data()
+volume_df = load_volume_data(start_date, end_date, time_frame)
 
 # --- Filter by Date Range ----------------------------------------------------------------------------------------------
 filtered_df = volume_df[(volume_df["day"] >= start_dt) & (volume_df["day"] <= end_dt)]
