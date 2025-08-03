@@ -32,48 +32,51 @@ timeframe = st.selectbox("Select Time Frame", ["month", "week", "day"])
 start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 
-# --- خواندن داده ها از API dune -----------------------------------------------------------------------------------------------
+# --- reding data from Dune API -----------------------------------------------------------------------------------------------
 @st.cache_data(ttl=600)
 def load_data():
     url = "https://api.dune.com/api/v1/query/5575605/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
     response = requests.get(url)
     data = response.json()
-    df = pd.DataFrame(data['result']['rows'])
-    # تبدیل day به datetime
-    df['day'] = pd.to_datetime(df['day'])
+    rows = data.get('result', {}).get('rows', [])
+    if not rows:
+        st.error("API response does not contain data rows!")
+        return pd.DataFrame()
+    df = pd.DataFrame(rows)
+    if 'date' not in df.columns:
+        st.error("Column 'date' not found in data!")
+        return pd.DataFrame()
+    df['date'] = pd.to_datetime(df['date'])
     return df
 
 df = load_data()
 
-# --- فیلتر بر اساس بازه انتخاب شده
-df = df[(df['day'] >= pd.to_datetime(start_date)) & (df['day'] <= pd.to_datetime(end_date))]
+df = df[(df['date'] >= pd.to_datetime(start_date)) & (df['date'] <= pd.to_datetime(end_date))]
 
-# --- تابع برای تغییر بازه زمانی (day, week, month)
 def resample_df(df, timeframe):
     if timeframe == "day":
         df_resampled = df.copy()
     else:
-        df['period'] = df['day'].dt.to_period(timeframe[0].upper()).dt.start_time
+        df['period'] = df['date'].dt.to_period(timeframe[0].upper()).dt.start_time
         df_resampled = df.groupby(['period', 'platform']).agg({
             'num_txs': 'sum',
             'volume': 'sum'
         }).reset_index()
-        df_resampled.rename(columns={'period':'day'}, inplace=True)
+        df_resampled.rename(columns={'period':'date'}, inplace=True)
     return df_resampled
 
 df_resampled = resample_df(df, timeframe)
 
-# --- ردیف اول: دو stacked bar chart (تعداد تراکنش و حجم تراکنش) در طول زمان
 col1, col2 = st.columns(2)
 
 with col1:
     fig1 = px.bar(
         df_resampled,
-        x='day',
+        x='date',
         y='num_txs',
         color='platform',
         title="Number of Transactions by Platform Over Time",
-        labels={'day': 'Date', 'num_txs': 'Number of Transactions'},
+        labels={'date': 'Date', 'num_txs': 'Number of Transactions'},
         barmode='stack'
     )
     fig1.update_layout(xaxis_title='Date', yaxis_title='Number of Transactions')
@@ -82,18 +85,17 @@ with col1:
 with col2:
     fig2 = px.bar(
         df_resampled,
-        x='day',
+        x='date',
         y='volume',
         color='platform',
         title="Volume of Transactions by Platform Over Time",
-        labels={'day': 'Date', 'volume': 'Transaction Volume'},
+        labels={'date': 'Date', 'volume': 'Transaction Volume'},
         barmode='stack'
     )
     fig2.update_layout(xaxis_title='Date', yaxis_title='Transaction Volume')
     st.plotly_chart(fig2, use_container_width=True)
 
-# --- ردیف دوم: دو نمودار خطی تجمعی برای حجم و تعداد تراکنش هر پلتفرم در طول زمان
-df_resampled = df_resampled.sort_values('day')
+df_resampled = df_resampled.sort_values('date')
 df_resampled['cumulative_num_txs'] = df_resampled.groupby('platform')['num_txs'].cumsum()
 df_resampled['cumulative_volume'] = df_resampled.groupby('platform')['volume'].cumsum()
 
@@ -102,26 +104,25 @@ col3, col4 = st.columns(2)
 with col3:
     fig3 = px.line(
         df_resampled,
-        x='day',
+        x='date',
         y='cumulative_volume',
         color='platform',
         title="Cumulative Transaction Volume by Platform Over Time",
-        labels={'day': 'Date', 'cumulative_volume': 'Cumulative Volume'}
+        labels={'date': 'Date', 'cumulative_volume': 'Cumulative Volume'}
     )
     st.plotly_chart(fig3, use_container_width=True)
 
 with col4:
     fig4 = px.line(
         df_resampled,
-        x='day',
+        x='date',
         y='cumulative_num_txs',
         color='platform',
         title="Cumulative Number of Transactions by Platform Over Time",
-        labels={'day': 'Date', 'cumulative_num_txs': 'Cumulative Number of Transactions'}
+        labels={'date': 'Date', 'cumulative_num_txs': 'Cumulative Number of Transactions'}
     )
     st.plotly_chart(fig4, use_container_width=True)
 
-# --- ردیف سوم: دو bar chart که کل تعداد و حجم تراکنش هر پلتفرم را نشان می‌دهد با مقدار روی ستون
 df_total = df.groupby('platform').agg({
     'num_txs': 'sum',
     'volume': 'sum'
