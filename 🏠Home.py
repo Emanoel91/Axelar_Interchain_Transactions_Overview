@@ -36,7 +36,7 @@ st.markdown(
 st.markdown(
     """
     <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">
-        Intro
+        Introduction
     </div>
 
     <div style="background-color: #e6fa36; padding: 15px; border-radius: 10px; border: 1px solid #ffd700;">
