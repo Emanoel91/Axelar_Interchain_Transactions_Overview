@@ -12,20 +12,10 @@ st.set_page_config(
 )
 
 # --- Title with Logo ---------------------------------------------------------------------------------------------------
-st.markdown(
-    """
-    🚀Interchain Transfers
-    """
-)
+st.title("🚀Interchain Transfers")
 
-st.info(
-    "📊Charts initially display data for a default time range. Select a custom range to view results for your desired period."
-
-)
-
-st.info(
-    "⏳On-chain data retrieval may take a few moments. Please wait while the results load."
-)
+st.info("📊Charts initially display data for a default time range. Select a custom range to view results for your desired period.")
+st.info("⏳On-chain data retrieval may take a few moments. Please wait while the results load.")
 
 # --- Snowflake Connection --------------------------------------------------------------------------------------------------
 conn = snowflake.connector.connect(
