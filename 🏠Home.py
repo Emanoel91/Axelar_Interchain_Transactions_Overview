@@ -57,7 +57,7 @@ st.markdown(
 st.markdown(
     """
     <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">
-        🛠Method
+        🧫Method
     </div>
 
     <div style="background-color: #b3fbc7; padding: 15px; border-radius: 10px; border: 1px solid #b3fbc7;">
@@ -77,7 +77,7 @@ st.markdown(
 st.markdown(
     """
     <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">
-        ⚠Limitations
+        🔰Limitations
     </div>
 
     <div style="background-color: #b3fbc7; padding: 15px; border-radius: 10px; border: 1px solid #b3fbc7;">
