@@ -107,8 +107,7 @@ if not dune_tvl.empty:
 else:
     st.warning("No data available.")
 
-# --------------
-# --- Row 1: Metrics ---
-col1, col2 = st.columns(2)
-col1.metric("Current Success Rate of Transactions", f"{success_rate}%")
-col2.metric("Total Transactions Count", f"{total_txs:,}")
+# --- Row 2: Bar Chart ---
+fig_bar = px.bar(df, x="Date", y="TXs Count", color="TX Success",
+                 title="Number of Transactions Based on Success Over Time")
+st.plotly_chart(fig_bar)
