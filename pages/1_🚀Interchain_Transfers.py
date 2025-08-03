@@ -34,80 +34,100 @@ start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 
 # --- Query Functions ---------------------------------------------------------------------------------------
-# --- Getting D.API ---
-@st.cache_data(ttl=3600)  # --- cache for 1 hour
-def load_dune_tvl():
-    url = "https://api.dune.com/api/v1/query/5524904/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
+# --- Row 1, 2, 3: Load Additional Dune API Data ---------------------------------------------------------------------------------------
+@st.cache_data(ttl=3600)
+def load_volume_data():
+    url = "https://api.dune.com/api/v1/query/5574227/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
         df = pd.DataFrame(data["result"]["rows"])
-        if "TVL" in df.columns:
-            df["TVL"] = pd.to_numeric(df["TVL"], errors="coerce")
-            df = df.sort_values("TVL", ascending=False)
+        df["day"] = pd.to_datetime(df["day"])
+        df["volume"] = pd.to_numeric(df["volume"], errors="coerce")
+        df["num_txs"] = pd.to_numeric(df["num_txs"], errors="coerce")
         return df
     else:
-        st.error(f"Failed to fetch Dune data: {response.status_code}")
-        return pd.DataFrame(columns=["Chain", "Token Symbol", "TVL"])
-
-# ----------------------
-@st.cache_data
-def load_main_data(timeframe, start_date, end_date):
-    query = f"""
-    SELECT date_trunc('{timeframe}', block_timestamp) AS "Date",
-           COUNT(DISTINCT tx_id) AS "TXs Count",
-           tx_succeeded AS "TX Success"
-    FROM AXELAR.CORE.FACT_TRANSACTIONS
-    WHERE block_timestamp::date >= '{start_date}'
-      AND block_timestamp::date <= '{end_date}'
-    GROUP BY 1, 3
-    ORDER BY 1
-    """
-    return pd.read_sql(query, conn)
+        st.error(f"Failed to fetch volume data: {response.status_code}")
+        return pd.DataFrame(columns=["day", "volume", "num_txs", "service"])
 
 # --- Load Data ----------------------------------------------------------------------------------------
-dune_tvl = load_dune_tvl()
-df = load_main_data(timeframe, start_date, end_date)
+volume_df = load_volume_data()
 # ------------------------------------------------------------------------------------------------------
-if not dune_tvl.empty:
-    # --- chain search filter ---
-    chain_list = dune_tvl["Chain"].unique().tolist()
-    selected_chain = st.selectbox("🔎 Choose your desired chain", chain_list, index=chain_list.index("Axelar") if "Axelar" in chain_list else 0)
+# --- Apply time filter ---
+filtered_df = volume_df[(volume_df["day"] >= pd.to_datetime(start_date)) & (volume_df["day"] <= pd.to_datetime(end_date))]
 
-    # --- TVL for selected chain ---
-    selected_tvl = dune_tvl.loc[dune_tvl["Chain"] == selected_chain, "TVL"].sum()
-    st.metric(label=f"TVL of {selected_chain}", value=f"${selected_tvl:,.0f}")
+# --- Aggregate by selected timeframe ---
+def aggregate_by_time(df, time_col="day", time_frame="day"):
+    df = df.copy()
+    if time_frame == "week":
+        df["time_period"] = df[time_col].dt.to_period("W").apply(lambda r: r.start_time)
+    elif time_frame == "month":
+        df["time_period"] = df[time_col].dt.to_period("M").apply(lambda r: r.start_time)
+    else:
+        df["time_period"] = df[time_col]
+    return df
 
-    # --- table ---
-    st.markdown("<h4 style='font-size:18px;'>TVL of Different Chains</h4>", unsafe_allow_html=True)
-    st.dataframe(dune_tvl.style.format({"TVL": "{:,.0f}"}), use_container_width=True)
+agg_df = aggregate_by_time(filtered_df, time_frame=timeframe)
 
-    # --- chart ---
-    def human_format(num):
-        if num >= 1e9:
-            return f"{num/1e9:.1f}B"
-        elif num >= 1e6:
-            return f"{num/1e6:.1f}M"
-        elif num >= 1e3:
-            return f"{num/1e3:.1f}K"
-        else:
-            return str(int(num))
+# ---------------------- Row 1: KPIs (num_txs) ----------------------
+col1, col2 = st.columns(2)
+with col1:
+    gmp_txs = agg_df[agg_df["service"] == "GMP"]["num_txs"].sum()
+    st.metric("📨 Total GMP Transactions", f"{gmp_txs:,.0f}")
 
-    fig = px.bar(
-        dune_tvl.head(15),
-        x="Chain",
-        y="TVL",
-        color="Chain",
-        title="Top Chains by TVL ($USD)",
-        text=dune_tvl.head(15)["TVL"].apply(human_format)
+with col2:
+    token_txs = agg_df[agg_df["service"] == "Token Transfers"]["num_txs"].sum()
+    st.metric("💸 Total Token Transfers Transactions", f"{token_txs:,.0f}")
+
+# ---------------------- Row 2: KPIs (volume) ----------------------
+col3, col4 = st.columns(2)
+with col3:
+    gmp_vol = agg_df[agg_df["service"] == "GMP"]["volume"].sum()
+    st.metric("📦 Total GMP Volume", f"${gmp_vol:,.0f}")
+
+with col4:
+    token_vol = agg_df[agg_df["service"] == "Token Transfers"]["volume"].sum()
+    st.metric("🔁 Total Token Transfers Volume", f"${token_vol:,.0f}")
+
+# ---------------------- Row 3: Charts ----------------------
+grouped_df = agg_df.groupby(["time_period", "service"]).agg({
+    "num_txs": "sum"
+}).reset_index()
+
+pivot_df = grouped_df.pivot(index="time_period", columns="service", values="num_txs").fillna(0)
+pivot_df = pivot_df.sort_index()
+
+# Fill missing service columns if not present
+for svc in ["GMP", "Token Transfers"]:
+    if svc not in pivot_df.columns:
+        pivot_df[svc] = 0
+
+col5, col6 = st.columns(2)
+
+# --- Stacked Bar Chart ---
+with col5:
+    fig_stack = go.Figure()
+    fig_stack.add_trace(go.Bar(x=pivot_df.index, y=pivot_df["GMP"], name="GMP"))
+    fig_stack.add_trace(go.Bar(x=pivot_df.index, y=pivot_df["Token Transfers"], name="Token Transfers"))
+    fig_stack.update_layout(
+        barmode="stack",
+        title="📊 Stacked TXs Count by Service",
+        xaxis_title="Date",
+        yaxis_title="TXs Count"
     )
-    fig.update_traces(textposition="outside")
-    fig.update_layout(xaxis_title="Chain", yaxis_title="TVL", showlegend=False)
-    st.plotly_chart(fig, use_container_width=True)
-else:
-    st.warning("No data available.")
+    st.plotly_chart(fig_stack, use_container_width=True)
 
-# --- Row 2: Bar Chart ---
-fig_bar = px.bar(df, x="Date", y="TXs Count", color="TX Success",
-                 title="Number of Transactions Based on Success Over Time")
-st.plotly_chart(fig_bar)
+# --- Normalized Stacked Bar Chart ---
+with col6:
+    pivot_norm = pivot_df.div(pivot_df.sum(axis=1), axis=0)
+    fig_norm = go.Figure()
+    fig_norm.add_trace(go.Bar(x=pivot_norm.index, y=pivot_norm["GMP"], name="GMP"))
+    fig_norm.add_trace(go.Bar(x=pivot_norm.index, y=pivot_norm["Token Transfers"], name="Token Transfers"))
+    fig_norm.update_layout(
+        barmode="stack",
+        title="📊 Normalized TXs Distribution by Service",
+        xaxis_title="Date",
+        yaxis_title="Share",
+        yaxis=dict(tickformat=".0%")
+    )
+    st.plotly_chart(fig_norm, use_container_width=True)
