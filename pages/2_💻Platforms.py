@@ -32,7 +32,7 @@ timeframe = st.selectbox("Select Time Frame", ["month", "week", "day"])
 start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 
-# --- API Fetch and DataFrame Preparation ------------------------------------------------------------------------------
+# --- API Fetch and DataFrame Preparation ------------------------------------------------------------------------------  
 api_url = "https://api.dune.com/api/v1/query/5575605/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
 response = requests.get(api_url)
 
@@ -40,15 +40,19 @@ if response.status_code == 200:
     data = response.json()
     df_api = pd.DataFrame(data["result"]["rows"])
 
-    # --- Convert 'day' to datetime and filter based on selected dates ------------------------------------------------
     if "day" in df_api.columns:
+        # تبدیل ستون day به datetime و حذف ردیف‌های نامعتبر
         df_api["day"] = pd.to_datetime(df_api["day"], errors="coerce")
         df_api = df_api.dropna(subset=["day"])
-        start_date = pd.to_datetime(start_date)
-        end_date = pd.to_datetime(end_date)
-        df_api = df_api[(df_api["day"] >= start_date) & (df_api["day"] <= end_date)]
 
-        # --- Aggregate for different timeframes -----------------------------------------------------------------------
+        # تبدیل start_date و end_date به datetime (برای اطمینان)
+        start_date_dt = pd.to_datetime(start_date)
+        end_date_dt = pd.to_datetime(end_date)
+
+        # فیلتر داده‌ها بر اساس بازه زمانی انتخاب شده
+        df_api = df_api[(df_api["day"] >= start_date_dt) & (df_api["day"] <= end_date_dt)]
+
+        # تعیین ستون time_bucket بر اساس بازه انتخابی
         df_api["time_bucket"] = df_api["day"]
         if timeframe == "week":
             df_api["time_bucket"] = df_api["day"].dt.to_period("W").apply(lambda r: r.start_time)
