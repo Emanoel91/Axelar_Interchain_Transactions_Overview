@@ -79,11 +79,11 @@ txs_grouped = service_df.groupby(["timeframe", "service"])["num_txs"].sum().rese
 
 fig_txs = px.bar(
     txs_grouped, x="timeframe", y="num_txs", color="service",
-    title="Transactions by Service (Stacked)",
+    title="Transactions by Service Over Time",
 )
 fig_txs_norm = px.bar(
     txs_grouped, x="timeframe", y="num_txs", color="service",
-    title="Normalized Transactions by Service",
+    title="Normalized Transactions by Service Over Time",
     barmode="relative"
 )
 fig_txs_norm.update_layout(barmode="stack", barnorm="percent")
@@ -99,11 +99,11 @@ volume_grouped = service_df.groupby(["timeframe", "service"])["volume"].sum().re
 
 fig_vol = px.bar(
     volume_grouped, x="timeframe", y="volume", color="service",
-    title="Volume by Service (Stacked)",
+    title="Volume by Service Over Time",
 )
 fig_vol_norm = px.bar(
     volume_grouped, x="timeframe", y="volume", color="service",
-    title="Normalized Volume by Service",
+    title="Normalized Volume by Service Over Time",
     barmode="relative"
 )
 fig_vol_norm.update_layout(barmode="stack", barnorm="percent")
