@@ -152,3 +152,9 @@ with col6:
     fig6.update_traces(texttemplate='%{text:.2f}', textposition='outside')
     fig6.update_layout(yaxis_range=[0, df_total['volume'].max()*1.1])
     st.plotly_chart(fig6, use_container_width=True)
+
+
+st.write("dtype of df['date']:", df['date'].dtype)
+st.write("type of start_date:", type(start_date))
+st.write("type of end_date:", type(end_date))
+
