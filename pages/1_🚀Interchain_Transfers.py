@@ -212,7 +212,7 @@ else:
     st.warning("No transfer data found for selected period.")
 
 # --- Row: Top Source Chains by Transfer Count ----------------------------------------------------------------------------------------------------------------
-st.subheader("🌐 Top Source Chains by Number of Transfers")
+st.subheader("📤 Source Chains by Number of Transfers")
 
 @st.cache_data(ttl=3600)
 def load_top_source_chains(start_date, end_date):
@@ -260,7 +260,7 @@ if not top_chains_df.empty:
     col1, col2 = st.columns([0.5, 0.5])
 
     with col1:
-        st.markdown("**Top Source Chains Table**")
+        # -- st.markdown("**Top Source Chains Table**")
         st.dataframe(top_chains_df, use_container_width=True)
 
     # --- Bar Chart for Top 10 Chains ---
@@ -273,7 +273,7 @@ if not top_chains_df.empty:
         orientation='h',
         color="Source Chain",
         text="Transfer Count",
-        title="Top 10 Source Chains by Transfers"
+        title="🏆Top 10 Source Chains by Transfers Count"
     )
     fig_barh.update_traces(textposition='outside')
     fig_barh.update_layout(showlegend=False)
