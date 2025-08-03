@@ -39,7 +39,7 @@ st.markdown(
         📜Introduction
     </div>
 
-    <div style="background-color: #b3fbc7; padding: 15px; border-radius: 10px; border: 1px solid #b3fbc7;">
+    <div style="background-color: #c3c3c3; padding: 15px; border-radius: 10px; border: 1px solid #c3c3c3;">
         Axelar facilitates secure cross-chain communication within the Web3 ecosystem. It empowers dApp users to seamlessly engage with any 
         asset or application across multiple chains with a single click. Currently, Axelar supports 50 different chains.
         Interchain dApps like Prime Protocol and Mint DAO utilize Axelar's capabilities to offer cross-chain services to users, while other 
@@ -60,7 +60,7 @@ st.markdown(
         🧫Method
     </div>
 
-    <div style="background-color: #b3fbc7; padding: 15px; border-radius: 10px; border: 1px solid #b3fbc7;">
+    <div style="background-color: #c3c3c3; padding: 15px; border-radius: 10px; border: 1px solid #c3c3c3;">
         In this dashboard, we first provide an overview of Axelar performance, including transactions, blocks, and users. Then, 
         we dive into specific transaction types, namely interchain transactions. These transactions can be used exclusively for 
         token transfers or as general message passing (GMPs), which have a general use.
@@ -80,7 +80,7 @@ st.markdown(
         🔰Limitations
     </div>
 
-    <div style="background-color: #b3fbc7; padding: 15px; border-radius: 10px; border: 1px solid #b3fbc7;">
+    <div style="background-color: #c3c3c3; padding: 15px; border-radius: 10px; border: 1px solid #c3c3c3;">
         Axelar's integrations extend to over 50 chains, but not all of them are supported by data providers. This dashboard relies on Flipside's 
         data, which covers nearly all of the prominent EVM chains. Consequently, the analysis is centered around the top supported chains by 
         activity, including Ethereum, Binance, Arbitrum, Polygon, Optimism, Base, and Avalanche. All interchain transfers and GMPs sent from these 
