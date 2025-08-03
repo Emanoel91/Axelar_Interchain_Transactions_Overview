@@ -3,6 +3,7 @@ import pandas as pd
 import requests
 import snowflake.connector
 import plotly.graph_objects as go
+import plotly.express as px
 
 # --- Page Config: Tab Title & Icon -------------------------------------------------------------------------------------
 st.set_page_config(
