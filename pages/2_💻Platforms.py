@@ -44,7 +44,9 @@ if response.status_code == 200:
     if "day" in df_api.columns:
         df_api["day"] = pd.to_datetime(df_api["day"], errors="coerce")
         df_api = df_api.dropna(subset=["day"])
-        df_api = df_api[(df_api["day"] >= pd.to_datetime(start_date)) & (df_api["day"] <= pd.to_datetime(end_date))]
+        start_date = pd.to_datetime(start_date)
+end_date = pd.to_datetime(end_date)
+df_api = df_api[(df_api["day"] >= start_date) & (df_api["day"] <= end_date)]
 
         # --- Aggregate for different timeframes -----------------------------------------------------------------------
         df_api["time_bucket"] = df_api["day"]
