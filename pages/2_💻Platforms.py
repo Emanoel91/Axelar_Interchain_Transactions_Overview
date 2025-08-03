@@ -89,18 +89,38 @@ fig_vol_norm.update_layout(barnorm="percent")
 col3.plotly_chart(fig_vol, use_container_width=True)
 col4.plotly_chart(fig_vol_norm, use_container_width=True)
 
-# --- Donut Charts: Share of Total ---
-st.subheader("🍩 Share of Total TXs & Volume")
+# --- Bar Charts: Total TXs & Volume by Platform ---
+st.subheader("📦 Total Transactions & Volume by Platform")
 
-total_txs_share = df_filtered.groupby("platform")["num_txs"].sum().reset_index()
-total_vol_share = df_filtered.groupby("platform")["volume"].sum().reset_index()
+total_summary = df_filtered.groupby("platform").agg({
+    "num_txs": "sum",
+    "volume": "sum"
+}).reset_index()
+
+# --- Bar Chart: Total Transactions ---
+fig_total_txs = px.bar(
+    total_summary,
+    x="platform",
+    y="num_txs",
+    text="num_txs",
+    color="platform",
+    title="Total Transactions per Platform"
+)
+fig_total_txs.update_traces(textposition="outside")
+fig_total_txs.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+
+# --- Bar Chart: Total Volume ---
+fig_total_vol = px.bar(
+    total_summary,
+    x="platform",
+    y="volume",
+    text="volume",
+    color="platform",
+    title="Total Volume per Platform"
+)
+fig_total_vol.update_traces(textposition="outside")
+fig_total_vol.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
 
 col5, col6 = st.columns(2)
-
-fig_donut_txs = px.pie(total_txs_share, values="num_txs", names="platform",
-                       title="Share of Transactions", hole=0.5)
-fig_donut_vol = px.pie(total_vol_share, values="volume", names="platform",
-                       title="Share of Volume", hole=0.5)
-
-col5.plotly_chart(fig_donut_txs, use_container_width=True)
-col6.plotly_chart(fig_donut_vol, use_container_width=True)
+col5.plotly_chart(fig_total_txs, use_container_width=True)
+col6.plotly_chart(fig_total_vol, use_container_width=True)
