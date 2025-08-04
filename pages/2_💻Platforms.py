@@ -149,13 +149,23 @@ with col4:
 col5, col6 = st.columns(2)
 
 with col5:
-    fig5 = px.area(df, x="Date", y="Avg Transfer Volume per User", color="Platform",
-                   title="Avg Transfers Volume per User Over Time")
+    fig5 = px.area(
+        df,
+        x="Date",
+        y="Avg Transfer Volume per User",
+        color="Platform",
+        title="Avg Transfers Volume per User Over Time",
+        labels={"Avg Transfer Volume per User": "USD"}
+    )
     st.plotly_chart(fig5, use_container_width=True)
 
 with col6:
-    fig6 = px.area(df, x="Date", y="Avg Transfer Volume per Txn", color="Platform",
-                   title="Avg Transfers Volume per Transaction Over Time")
+    fig6 = px.area(
+        df,
+        x="Date",
+        y="Avg Transfer Volume per Txn",
+        color="Platform",
+        title="Avg Transfers Volume per Transaction Over Time",
+        labels={"Avg Transfer Volume per Txn": "USD"}
+    )
     st.plotly_chart(fig6, use_container_width=True)
-
-
