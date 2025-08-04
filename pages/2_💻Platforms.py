@@ -142,16 +142,29 @@ platform_colors = {
     "Rango Exchange": "#ffcf68"
 }
 
+def apply_common_layout(fig, title):
+    fig.update_traces(textinfo='percent+label', hole=0.4)
+    fig.update_layout(
+        title=title,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.2,
+            xanchor="center",
+            x=0.5
+        )
+    )
+    return fig
+
 with col1:
     fig_pie1 = px.pie(
         df_overview,
         names="Platform",
         values="Transfer Count",
-        title="Total Number of Transfers By Platform",
         color="Platform",
         color_discrete_map=platform_colors
     )
-    fig_pie1.update_traces(textinfo='percent+label', hole=0.4)
+    fig_pie1 = apply_common_layout(fig_pie1, "Total Number of Transfers By Platform")
     st.plotly_chart(fig_pie1, use_container_width=True)
 
 with col2:
@@ -159,11 +172,10 @@ with col2:
         df_overview,
         names="Platform",
         values="Transfer Volume",
-        title="Total Volume of Transfers By Platform (USD)",
         color="Platform",
         color_discrete_map=platform_colors
     )
-    fig_pie2.update_traces(textinfo='percent+label', hole=0.4)
+    fig_pie2 = apply_common_layout(fig_pie2, "Total Volume of Transfers By Platform (USD)")
     st.plotly_chart(fig_pie2, use_container_width=True)
 
 with col3:
@@ -171,14 +183,11 @@ with col3:
         df_overview,
         names="Platform",
         values="Number of User",
-        title="Total Number of Users By Platform",
         color="Platform",
         color_discrete_map=platform_colors
     )
-    fig_pie3.update_traces(textinfo='percent+label', hole=0.4)
+    fig_pie3 = apply_common_layout(fig_pie3, "Total Number of Users By Platform")
     st.plotly_chart(fig_pie3, use_container_width=True)
-
-
 
 # --- Dynamic SQL based on filters (Row2,3,4) -------------------------------------------------------------------------------------
 query = f"""
