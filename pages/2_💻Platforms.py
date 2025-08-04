@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 # --- Title & Info Messages ---------------------------------------------------------------------------------------------
-st.title("🚀Platforms Powered By Axelar")
+st.title("💻Platforms Powered By Axelar")
 
 st.info("📊 Charts initially display data for a default time range. Select a custom range to view results for your desired period.")
 st.info("⏳ On-chain data retrieval may take a few moments. Please wait while the results load.")
@@ -127,10 +127,9 @@ from overview
 df_overview = pd.read_sql(query_overview, conn)
 
 # --- Row 1: Pie Charts for Platform Comparison ---------------------------------------------------------------------------
-
+st.subheader("🔎Platforms Overview")
 col1, col2, col3 = st.columns(3)
 
-# رنگ‌های ثابت برای تمام نمودارها
 platform_colors = {
     "Squid": "#006ac9",
     "Interchain Token Service": "#00b3a0",
@@ -278,7 +277,7 @@ order by 1
 df = pd.read_sql(query, conn)
 
 # --- Row 2: Stacked Bar Charts ---------------------------------------------------------------------------------------
-st.subheader("📊Transfers By Platform")
+st.subheader("📊Transfers By Platform Over Time")
 
 col1, col2 = st.columns(2)
 
