@@ -136,12 +136,14 @@ with col2:
 col3, col4 = st.columns(2)
 
 with col3:
-    fig3 = px.line(df, x="Date", y="Number of User", color="Platform", title="Number of Users By Platform Over Time")
+    fig3 = px.line(df, x="Date", y="Number of User", color="Platform", title="Number of Users By Platform Over Time",
+                  labels={"Number of User": "Address count"})
     st.plotly_chart(fig3, use_container_width=True)
 
 with col4:
     fig4 = px.scatter(df, x="Date", y="Avg Transfer Count per User", color="Platform",
-                      title="Avg Transfers Count per User Over Time")
+                      title="Avg Transfers Count per User Over Time",
+                      labels={"Avg Transfer Count per User": "Txns count"})
     st.plotly_chart(fig4, use_container_width=True)
 
 # --- Row 3: Area Charts -----------------------------------------------------------------------------------------------
