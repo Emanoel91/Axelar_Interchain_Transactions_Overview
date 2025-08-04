@@ -34,7 +34,125 @@ start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 
 # ------------------------------------------------------------------------------------------------------------------------
-# --- Dynamic SQL based on filters -------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
+# --- SQL Query: Overview with Time Filter (Row1) -------------------------------------------------------------------------------
+query_overview = f"""
+with overview as (with axelar_services as (
+select data:send:amount * data:link:price as amount, recipient_address as user, 
+id, 'Token Transfers' as service, case 
+when sender_address ilike '%0xce16F69375520ab01377ce7B88f5BA8C48F8D666%' then 'Squid'
+when sender_address ilike '%0xdf4fFDa22270c12d0b5b3788F1669D709476111E%' then 'Squid'
+when sender_address ilike '%0xB5FB4BE02232B1bBA4dC8f81dc24C26980dE9e3C%' then 'Interchain Token Service'
+when sender_address ilike '%0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56%' then 'MintDAO Bridge'
+when sender_address ilike '%0xbe54BaFC56B468d4D20D609F0Cf17fFc56b99913%' then 'Prime Protocol'
+when sender_address ilike '%0x0ADFb7975aa7c3aD90c57AEa8FDe5E31a721E9bb%' then 'Rango Exchange'
+when sender_address ilike '%0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44%' then 'The Junkyard'
+when sender_address ilike '%axelar1aqcj54lzz0rk22gvqgcn8fr5tx4rzwdv5wv5j9dmnacgefvd7wzsy2j2mr%' then 'Interchain Token Service'
+when sender_address ilike '%0xe6B3949F9bBF168f4E3EFc82bc8FD849868CC6d8%' then 'Squid'
+when sender_address ilike '%0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609%' then 'Nya Bridge'
+when sender_address ilike '%0xEac19c899098951fc6d0e6a7832b090474E2C292%' then 'eesee.io'
+end as "Platform"
+from axelar.axelscan.fact_transfers
+where (sender_address ilike '%0xce16F69375520ab01377ce7B88f5BA8C48F8D666%'
+or sender_address ilike '%0xdf4fFDa22270c12d0b5b3788F1669D709476111E%'
+or sender_address ilike '%0xB5FB4BE02232B1bBA4dC8f81dc24C26980dE9e3C%'
+or sender_address ilike '%0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56%'
+or sender_address ilike '%0xbe54BaFC56B468d4D20D609F0Cf17fFc56b99913%'
+or sender_address ilike '%0x0ADFb7975aa7c3aD90c57AEa8FDe5E31a721E9bb%'
+or sender_address ilike '%0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44%'
+or sender_address ilike '%axelar1aqcj54lzz0rk22gvqgcn8fr5tx4rzwdv5wv5j9dmnacgefvd7wzsy2j2mr%'
+or sender_address ilike '%0xe6B3949F9bBF168f4E3EFc82bc8FD849868CC6d8%'
+or sender_address ilike '%0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609%'
+or sender_address ilike '%0xEac19c899098951fc6d0e6a7832b090474E2C292%')
+and status='executed'
+and simplified_status='received'
+and (created_at::date >= '{start_date}' and created_at::date <= '{end_date}')
+
+union all
+
+select data:value as amount, 
+to_varchar(data:call:transaction:from) as user,
+to_varchar(id) as id, 'GMP' as service, case 
+when data:approved:returnValues:contractAddress ilike '%0xce16F69375520ab01377ce7B88f5BA8C48F8D666%' then 'Squid'
+when data:approved:returnValues:contractAddress ilike '%0xdf4fFDa22270c12d0b5b3788F1669D709476111E%' then 'Squid'
+when data:approved:returnValues:contractAddress ilike '%0xB5FB4BE02232B1bBA4dC8f81dc24C26980dE9e3C%' then 'Interchain Token Service'
+when data:approved:returnValues:contractAddress ilike '%0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56%' then 'MintDAO Bridge'
+when data:approved:returnValues:contractAddress ilike '%0xbe54BaFC56B468d4D20D609F0Cf17fFc56b99913%' then 'Prime Protocol'
+when data:approved:returnValues:contractAddress ilike '%0x0ADFb7975aa7c3aD90c57AEa8FDe5E31a721E9bb%' then 'Rango Exchange'
+when data:approved:returnValues:contractAddress ilike '%0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44%' then 'The Junkyard'
+when data:approved:returnValues:contractAddress ilike '%axelar1aqcj54lzz0rk22gvqgcn8fr5tx4rzwdv5wv5j9dmnacgefvd7wzsy2j2mr%' then 'Interchain Token Service'
+when data:approved:returnValues:contractAddress ilike '%0xe6B3949F9bBF168f4E3EFc82bc8FD849868CC6d8%' then 'Squid'
+when data:approved:returnValues:contractAddress ilike '%0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609%' then 'Nya Bridge'
+when data:approved:returnValues:contractAddress ilike '%0xEac19c899098951fc6d0e6a7832b090474E2C292%' then 'eesee.io'
+end as "Platform"
+from axelar.axelscan.fact_gmp
+where (data:approved:returnValues:contractAddress ilike '%0xce16F69375520ab01377ce7B88f5BA8C48F8D666%'
+or data:approved:returnValues:contractAddress ilike '%0xdf4fFDa22270c12d0b5b3788F1669D709476111E%'
+or data:approved:returnValues:contractAddress ilike '%0xB5FB4BE02232B1bBA4dC8f81dc24C26980dE9e3C%'
+or data:approved:returnValues:contractAddress ilike '%0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56%'
+or data:approved:returnValues:contractAddress ilike '%0xbe54BaFC56B468d4D20D609F0Cf17fFc56b99913%'
+or data:approved:returnValues:contractAddress ilike '%0x0ADFb7975aa7c3aD90c57AEa8FDe5E31a721E9bb%'
+or data:approved:returnValues:contractAddress ilike '%0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44%'
+or data:approved:returnValues:contractAddress ilike '%axelar1aqcj54lzz0rk22gvqgcn8fr5tx4rzwdv5wv5j9dmnacgefvd7wzsy2j2mr%'
+or data:approved:returnValues:contractAddress ilike '%0xe6B3949F9bBF168f4E3EFc82bc8FD849868CC6d8%'
+or data:approved:returnValues:contractAddress ilike '%0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609%'
+or data:approved:returnValues:contractAddress ilike '%0xEac19c899098951fc6d0e6a7832b090474E2C292%')
+and status = 'executed'
+and simplified_status = 'received'
+and (created_at::date >= '{start_date}' and created_at::date <= '{end_date}')
+)
+
+select "Platform",
+count(distinct id) as "Transfer Count",
+round(sum(amount)) as "Transfer Volume",
+count(distinct user) as "Number of User",
+round(count(distinct id)/count(distinct user)) as "Avg Transfer Count per User",
+round(avg(amount),2) as "Avg Transfer Volume per Txn",
+round((sum(amount)/count(distinct user)),2) as "Avg Transfer Volume per User"
+from axelar_services
+group by 1)
+
+select "Platform", "Transfer Count", case
+when "Transfer Volume" is null then 0 else "Transfer Volume" end as "Transfer Volume",
+"Number of User", "Avg Transfer Count per User", case 
+when "Avg Transfer Volume per Txn" is null then 0 else "Avg Transfer Volume per Txn" end as 
+"Avg Transfer Volume per Txn", case 
+when "Avg Transfer Volume per User" is null then 0 else "Avg Transfer Volume per User" end as 
+"Avg Transfer Volume per User"
+from overview 
+
+"""
+
+# --- Run Query (Row 1) ----------------------------------------------------------------------------------------------------------
+df_overview = pd.read_sql(query_overview, conn)
+
+# --- Row 1: Pie Charts for Platform Comparison ---------------------------------------------------------------------------
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    fig_pie1 = px.pie(df_overview, names="Platform", values="Transfer Count",
+                      title="Total Number of Transfers By Platform",
+                      color_discrete_sequence=px.colors.qualitative.Set3)
+    fig_pie1.update_traces(textinfo='percent+label')
+    st.plotly_chart(fig_pie1, use_container_width=True)
+
+with col2:
+    fig_pie2 = px.pie(df_overview, names="Platform", values="Transfer Volume",
+                      title="Total Volume of Transfers By Platform (USD)",
+                      color_discrete_sequence=px.colors.qualitative.Pastel)
+    fig_pie2.update_traces(textinfo='percent+label')
+    st.plotly_chart(fig_pie2, use_container_width=True)
+
+with col3:
+    fig_pie3 = px.pie(df_overview, names="Platform", values="Number of User",
+                      title="Total Number of Users By Platform",
+                      color_discrete_sequence=px.colors.qualitative.Set1)
+    fig_pie3.update_traces(textinfo='percent+label')
+    st.plotly_chart(fig_pie3, use_container_width=True)
+
+
+# --- Dynamic SQL based on filters (Row2,3,4) -------------------------------------------------------------------------------------
 query = f"""
 with axelar_services as (
 select created_at, data:send:amount * data:link:price as amount, recipient_address as user, 
@@ -113,10 +231,10 @@ group by 1, 2
 order by 1
 """
 
-# --- Run Query --------------------------------------------------------------------------------------------------------
+# --- Run Query(Row2,3,4) --------------------------------------------------------------------------------------------------------
 df = pd.read_sql(query, conn)
 
-# --- Row 1: Stacked Bar Charts ---------------------------------------------------------------------------------------
+# --- Row 2: Stacked Bar Charts ---------------------------------------------------------------------------------------
 st.subheader("📊Transfers By Platform")
 
 col1, col2 = st.columns(2)
@@ -131,7 +249,7 @@ with col2:
                   labels={"Transfer Count": "Count"}, barmode="stack")
     st.plotly_chart(fig2, use_container_width=True)
 
-# --- Row 2: Line Chart & Scatter Chart --------------------------------------------------------------------------------
+# --- Row 3: Line Chart & Scatter Chart --------------------------------------------------------------------------------
 
 col3, col4 = st.columns(2)
 
@@ -146,7 +264,7 @@ with col4:
                       labels={"Avg Transfer Count per User": "Txns count"})
     st.plotly_chart(fig4, use_container_width=True)
 
-# --- Row 3: Area Charts -----------------------------------------------------------------------------------------------
+# --- Row 4: Area Charts -----------------------------------------------------------------------------------------------
 
 col5, col6 = st.columns(2)
 
