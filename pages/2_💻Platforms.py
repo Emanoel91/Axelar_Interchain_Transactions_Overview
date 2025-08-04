@@ -130,7 +130,7 @@ df_overview = pd.read_sql(query_overview, conn)
 
 col1, col2, col3 = st.columns(3)
 
-# colors defenition for platforms
+# رنگ‌های ثابت برای تمام نمودارها
 platform_colors = {
     "Squid": "#006ac9",
     "Interchain Token Service": "#00b3a0",
@@ -142,16 +142,21 @@ platform_colors = {
     "Rango Exchange": "#ffcf68"
 }
 
-def apply_common_layout(fig, title):
-    fig.update_traces(textinfo='percent+label', hole=0.4)
+# تابع تنظیمات مشترک
+def style_pie_chart(fig, title):
+    fig.update_traces(
+        textinfo='percent+label',
+        textposition='inside',
+        insidetextorientation='radial',
+        textfont_size=12
+    )
     fig.update_layout(
         title=title,
         legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=-0.2,
-            xanchor="center",
-            x=0.5
+            orientation="v",
+            x=1,
+            xanchor="left",
+            y=0.5
         )
     )
     return fig
@@ -164,7 +169,7 @@ with col1:
         color="Platform",
         color_discrete_map=platform_colors
     )
-    fig_pie1 = apply_common_layout(fig_pie1, "Total Number of Transfers By Platform")
+    fig_pie1 = style_pie_chart(fig_pie1, "Total Number of Transfers By Platform")
     st.plotly_chart(fig_pie1, use_container_width=True)
 
 with col2:
@@ -175,7 +180,7 @@ with col2:
         color="Platform",
         color_discrete_map=platform_colors
     )
-    fig_pie2 = apply_common_layout(fig_pie2, "Total Volume of Transfers By Platform (USD)")
+    fig_pie2 = style_pie_chart(fig_pie2, "Total Volume of Transfers By Platform (USD)")
     st.plotly_chart(fig_pie2, use_container_width=True)
 
 with col3:
@@ -186,8 +191,9 @@ with col3:
         color="Platform",
         color_discrete_map=platform_colors
     )
-    fig_pie3 = apply_common_layout(fig_pie3, "Total Number of Users By Platform")
+    fig_pie3 = style_pie_chart(fig_pie3, "Total Number of Users By Platform")
     st.plotly_chart(fig_pie3, use_container_width=True)
+
 
 # --- Dynamic SQL based on filters (Row2,3,4) -------------------------------------------------------------------------------------
 query = f"""
