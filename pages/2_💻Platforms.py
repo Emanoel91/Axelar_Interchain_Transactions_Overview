@@ -38,7 +38,7 @@ end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 # --- Load Platform Transfer Data from Dune API -------------------------------------------------------------------------
 @st.cache_data(ttl=3600)
 def load_platform_data():
-    url = "https://api.dune.com/api/v1/query/5576048/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
+    url = "https://api.dune.com/api/v1/query/5581150/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
