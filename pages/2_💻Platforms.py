@@ -117,47 +117,45 @@ order by 1
 df = pd.read_sql(query, conn)
 
 # --- Row 1: Stacked Bar Charts ---------------------------------------------------------------------------------------
-st.subheader("📦 Transfer Volume & Count by Platform")
+st.subheader("📊Transfers By Platform")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    fig1 = px.bar(df, x="Date", y="Transfer Volume", color="Platform", title="Transfer Volume by Platform",
+    fig1 = px.bar(df, x="Date", y="Transfer Volume", color="Platform", title="Volume of Transfers By Platform Over Time ($USD)",
                   labels={"Transfer Volume": "Volume"}, barmode="stack")
     st.plotly_chart(fig1, use_container_width=True)
 
 with col2:
-    fig2 = px.bar(df, x="Date", y="Transfer Count", color="Platform", title="Transfer Count by Platform",
+    fig2 = px.bar(df, x="Date", y="Transfer Count", color="Platform", title="Number of Transfers By Platform Over Time",
                   labels={"Transfer Count": "Count"}, barmode="stack")
     st.plotly_chart(fig2, use_container_width=True)
 
 # --- Row 2: Line Chart & Scatter Chart --------------------------------------------------------------------------------
-st.subheader("👥 User Count & Transfer Behavior by Platform")
 
 col3, col4 = st.columns(2)
 
 with col3:
-    fig3 = px.line(df, x="Date", y="Number of User", color="Platform", title="Number of Users Over Time")
+    fig3 = px.line(df, x="Date", y="Number of User", color="Platform", title="Number of Users By Platform Over Time")
     st.plotly_chart(fig3, use_container_width=True)
 
 with col4:
     fig4 = px.scatter(df, x="Date", y="Avg Transfer Count per User", color="Platform",
-                      title="Avg Transfers per User Over Time")
+                      title="Avg Transfers Count per User Over Time")
     st.plotly_chart(fig4, use_container_width=True)
 
 # --- Row 3: Area Charts -----------------------------------------------------------------------------------------------
-st.subheader("📈 Transfer Volume Trends by Platform")
 
 col5, col6 = st.columns(2)
 
 with col5:
     fig5 = px.area(df, x="Date", y="Avg Transfer Volume per User", color="Platform",
-                   title="Avg Transfer Volume per User")
+                   title="Avg Transfers Volume per User Over Time")
     st.plotly_chart(fig5, use_container_width=True)
 
 with col6:
     fig6 = px.area(df, x="Date", y="Avg Transfer Volume per Txn", color="Platform",
-                   title="Avg Transfer Volume per Transaction")
+                   title="Avg Transfers Volume per Transaction Over Time")
     st.plotly_chart(fig6, use_container_width=True)
 
 
