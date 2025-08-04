@@ -130,26 +130,54 @@ df_overview = pd.read_sql(query_overview, conn)
 
 col1, col2, col3 = st.columns(3)
 
+# colors defenition for platforms
+platform_colors = {
+    "Squid": "#006ac9",
+    "Interchain Token Service": "#00b3a0",
+    "MintDAO Bridge": "#ffa7a7",
+    "Prime Protocol": "#ff0000",
+    "Nya Bridge": "#ff8000",
+    "eesee.io": "#34f2a7",
+    "The Junkyard": "#62cbff",
+    "Rango Exchange": "#ffcf68"
+}
+
 with col1:
-    fig_pie1 = px.pie(df_overview, names="Platform", values="Transfer Count",
-                      title="Total Number of Transfers By Platform",
-                      color_discrete_sequence=px.colors.qualitative.Set3)
-    fig_pie1.update_traces(textinfo='percent+label')
+    fig_pie1 = px.pie(
+        df_overview,
+        names="Platform",
+        values="Transfer Count",
+        title="Total Number of Transfers By Platform",
+        color="Platform",
+        color_discrete_map=platform_colors
+    )
+    fig_pie1.update_traces(textinfo='percent+label', hole=0.4)
     st.plotly_chart(fig_pie1, use_container_width=True)
 
 with col2:
-    fig_pie2 = px.pie(df_overview, names="Platform", values="Transfer Volume",
-                      title="Total Volume of Transfers By Platform (USD)",
-                      color_discrete_sequence=px.colors.qualitative.Pastel)
-    fig_pie2.update_traces(textinfo='percent+label')
+    fig_pie2 = px.pie(
+        df_overview,
+        names="Platform",
+        values="Transfer Volume",
+        title="Total Volume of Transfers By Platform (USD)",
+        color="Platform",
+        color_discrete_map=platform_colors
+    )
+    fig_pie2.update_traces(textinfo='percent+label', hole=0.4)
     st.plotly_chart(fig_pie2, use_container_width=True)
 
 with col3:
-    fig_pie3 = px.pie(df_overview, names="Platform", values="Number of User",
-                      title="Total Number of Users By Platform",
-                      color_discrete_sequence=px.colors.qualitative.Set1)
-    fig_pie3.update_traces(textinfo='percent+label')
+    fig_pie3 = px.pie(
+        df_overview,
+        names="Platform",
+        values="Number of User",
+        title="Total Number of Users By Platform",
+        color="Platform",
+        color_discrete_map=platform_colors
+    )
+    fig_pie3.update_traces(textinfo='percent+label', hole=0.4)
     st.plotly_chart(fig_pie3, use_container_width=True)
+
 
 
 # --- Dynamic SQL based on filters (Row2,3,4) -------------------------------------------------------------------------------------
