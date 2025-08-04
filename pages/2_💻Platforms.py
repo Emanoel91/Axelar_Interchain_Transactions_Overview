@@ -283,12 +283,12 @@ col1, col2 = st.columns(2)
 
 with col1:
     fig1 = px.bar(df, x="Date", y="Transfer Volume", color="Platform", title="Volume of Transfers By Platform Over Time ($USD)",
-                  labels={"Transfer Volume": "Volume"}, barmode="stack")
+                  labels={"Volume": "$USD"}, barmode="stack")
     st.plotly_chart(fig1, use_container_width=True)
 
 with col2:
     fig2 = px.bar(df, x="Date", y="Transfer Count", color="Platform", title="Number of Transfers By Platform Over Time",
-                  labels={"Transfer Count": "Count"}, barmode="stack")
+                  labels={"Count": "Txns count"}, barmode="stack")
     st.plotly_chart(fig2, use_container_width=True)
 
 # --- Row 3: Line Chart & Scatter Chart --------------------------------------------------------------------------------
