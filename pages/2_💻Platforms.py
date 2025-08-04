@@ -261,7 +261,7 @@ with col5:
     fig5 = px.area(
         df,
         x="Date",
-        y="Avg Transfer Volume per User",
+        y="Avg Transfer Volume per User", 
         color="Platform",
         title="Avg Transfers Volume per User Over Time",
         labels={"Avg Transfer Volume per User": "USD"}
