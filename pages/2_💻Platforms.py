@@ -32,6 +32,86 @@ conn = snowflake.connector.connect(
 timeframe = st.selectbox("Select Time Frame", ["month", "week", "day"])
 start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
+# ----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+
+# --- Load Platform Transfer Data from Dune API -------------------------------------------------------------------------
+@st.cache_data(ttl=3600)
+def load_platform_data():
+    url = "https://api.dune.com/api/v1/query/5576048/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        df = pd.DataFrame(data["result"]["rows"])
+        df["date"] = pd.to_datetime(df["date"])
+        df["volume"] = pd.to_numeric(df["volume"], errors="coerce")
+        df["num_txs"] = pd.to_numeric(df["num_txs"], errors="coerce")
+        return df
+    else:
+        st.error(f"Failed to fetch platform data: {response.status_code}")
+        return pd.DataFrame(columns=["date", "volume", "num_txs", "platform"])
+
+platform_df_raw = load_platform_data()
+platform_df = platform_df_raw[
+    (platform_df_raw["date"].dt.date >= start_date) &
+    (platform_df_raw["date"].dt.date <= end_date)
+].copy()
+
+# --- Row 2: Platform-wise Pie Charts ------------------------------------------------------------------------------------
+st.subheader("🔄 Platform Share of Transfers and Volume")
+
+pie_col1, pie_col2 = st.columns(2)
+
+with pie_col1:
+    txs_by_platform = platform_df.groupby("platform")["num_txs"].sum().reset_index()
+    fig_txs = px.pie(txs_by_platform, names="platform", values="num_txs", title="Transactions by Platform")
+    st.plotly_chart(fig_txs, use_container_width=True)
+
+with pie_col2:
+    volume_by_platform = platform_df.groupby("platform")["volume"].sum().reset_index()
+    fig_volume = px.pie(volume_by_platform, names="platform", values="volume", title="Volume by Platform ($)")
+    st.plotly_chart(fig_volume, use_container_width=True)
+
+# --- Row 3: Time Series Stacked Bar Charts -----------------------------------------------------------------------------
+st.subheader("📈 Time Series of Transfers and Volume by Platform")
+
+# Convert to desired timeframe
+platform_df["timeframe"] = platform_df["date"].dt.to_period(timeframe[0].upper()).dt.to_timestamp()
+
+# Aggregate data
+grouped_df = platform_df.groupby(["timeframe", "platform"]).agg({
+    "num_txs": "sum",
+    "volume": "sum"
+}).reset_index()
+
+# --- Chart 1: Stacked Bar for num_txs ---
+bar_col1, bar_col2 = st.columns(2)
+
+with bar_col1:
+    fig_stack_txs = px.bar(
+        grouped_df,
+        x="timeframe",
+        y="num_txs",
+        color="platform",
+        title="Transactions Over Time by Platform",
+        labels={"num_txs": "Number of Transactions", "timeframe": "Time"}
+    )
+    fig_stack_txs.update_layout(barmode='stack', xaxis_title="Time", yaxis_title="Transactions")
+    st.plotly_chart(fig_stack_txs, use_container_width=True)
+
+# --- Chart 2: Stacked Bar for volume ---
+with bar_col2:
+    fig_stack_volume = px.bar(
+        grouped_df,
+        x="timeframe",
+        y="volume",
+        color="platform",
+        title="Volume Over Time by Platform ($)",
+        labels={"volume": "Volume ($)", "timeframe": "Time"}
+    )
+    fig_stack_volume.update_layout(barmode='stack', xaxis_title="Time", yaxis_title="Volume ($)")
+    st.plotly_chart(fig_stack_volume, use_container_width=True)
+
 
 # ------------------------------------------------------------------------------------------------------------------------
 # ------------------------------------------------------------------------------------------------------------------------
