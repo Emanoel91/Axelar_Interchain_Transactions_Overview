@@ -60,17 +60,63 @@ platform_df = platform_df_raw[
 # --- Row 2: Platform-wise Pie Charts ------------------------------------------------------------------------------------
 st.subheader("🔄 Platform Share of Transfers and Volume")
 
-pie_col1, pie_col2 = st.columns(2)
+col1, col2 = st.columns(2)
 
-with pie_col1:
+# رنگ‌های ثابت پلتفرم‌ها
+platform_colors = {
+    "Squid": "#006ac9",
+    "Interchain Token Service": "#00b3a0",
+    "MintDAO Bridge": "#ffa7a7",
+    "Prime Protocol": "#ff0000",
+    "Nya Bridge": "#ff8000",
+    "eesee.io": "#34f2a7",
+    "The Junkyard": "#62cbff",
+    "Rango Exchange": "#ffcf68"
+}
+
+# تابع تنظیمات مشترک برای نمودار دایره‌ای
+def style_pie_chart(fig, title):
+    fig.update_traces(
+        textinfo='percent+label',
+        textposition='inside',
+        insidetextorientation='radial',
+        textfont_size=12
+    )
+    fig.update_layout(
+        title=title,
+        legend=dict(
+            orientation="v",
+            x=1,
+            xanchor="left",
+            y=0.5
+        )
+    )
+    return fig
+
+with col1:
     txs_by_platform = platform_df.groupby("platform")["num_txs"].sum().reset_index()
-    fig_txs = px.pie(txs_by_platform, names="platform", values="num_txs", title="Transactions by Platform")
+    fig_txs = px.pie(
+        txs_by_platform,
+        names="platform",
+        values="num_txs",
+        color="platform",
+        color_discrete_map=platform_colors
+    )
+    fig_txs = style_pie_chart(fig_txs, "Transactions by Platform")
     st.plotly_chart(fig_txs, use_container_width=True)
 
-with pie_col2:
+with col2:
     volume_by_platform = platform_df.groupby("platform")["volume"].sum().reset_index()
-    fig_volume = px.pie(volume_by_platform, names="platform", values="volume", title="Volume by Platform ($)")
+    fig_volume = px.pie(
+        volume_by_platform,
+        names="platform",
+        values="volume",
+        color="platform",
+        color_discrete_map=platform_colors
+    )
+    fig_volume = style_pie_chart(fig_volume, "Volume by Platform ($)")
     st.plotly_chart(fig_volume, use_container_width=True)
+
 
 # --- Row 3: Time Series Stacked Bar Charts -----------------------------------------------------------------------------
 st.subheader("📈 Time Series of Transfers and Volume by Platform")
