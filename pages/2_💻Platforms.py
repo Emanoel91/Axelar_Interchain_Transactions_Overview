@@ -33,9 +33,9 @@ timeframe = st.selectbox("Select Time Frame", ["month", "week", "day"])
 start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 
-# --- Load data from Dune API ---
+# --- Load Axelar Platforms Transfer Data from Dune API ---
 @st.cache_data(ttl=3600)
-def load_data():
+def load_platform_data():
     url = "https://api.dune.com/api/v1/query/5575605/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
     response = requests.get(url)
     if response.status_code == 200:
@@ -46,103 +46,111 @@ def load_data():
         df["num_txs"] = pd.to_numeric(df["num_txs"], errors="coerce")
         return df
     else:
-        st.error(f"Failed to load data. Status code: {response.status_code}")
-        return pd.DataFrame(columns=["date", "platform", "volume", "num_txs"])
+        st.error(f"Failed to fetch platform data: {response.status_code}")
+        return pd.DataFrame(columns=["date", "volume", "num_txs", "platform"])
 
-# --- Load & Filter ---
-df = load_data()
+# --- Filter and Resample Platform Data ---
+platform_df_raw = load_platform_data()
 
-# Filter by time period
-df = df[
-    (df["date"].dt.date >= start_date) &
-    (df["date"].dt.date <= end_date)
+# Filter based on selected date
+platform_df = platform_df_raw[
+    (platform_df_raw["date"].dt.date >= start_date) &
+    (platform_df_raw["date"].dt.date <= end_date)
 ].copy()
 
-# Add timeframe column
-df["timeframe"] = df["date"].dt.to_period(timeframe[0].upper()).dt.to_timestamp()
+# Resample to selected timeframe
+if timeframe == "day":
+    platform_df["period"] = platform_df["date"]
+elif timeframe == "week":
+    platform_df["period"] = platform_df["date"].dt.to_period("W").dt.start_time
+elif timeframe == "month":
+    platform_df["period"] = platform_df["date"].dt.to_period("M").dt.start_time
 
-# --- Row 1: Stacked Bar Charts (per timeframe) ---
-st.subheader("📊 Transactions & Volume Over Time (by Platform)")
+# ====================
+# Row 1: Stacked Bar Charts - Volume & TXs Over Time
+# ====================
+st.subheader("📊 Transfers Over Time (Grouped by Platform)")
 
-# Group by timeframe and platform
-grouped = df.groupby(["timeframe", "platform"]).agg({
-    "num_txs": "sum",
-    "volume": "sum"
+grouped_time = platform_df.groupby(["period", "platform"]).agg({
+    "volume": "sum",
+    "num_txs": "sum"
 }).reset_index()
 
 col1, col2 = st.columns(2)
 
-# Transactions
-fig_txs = px.bar(
-    grouped, x="timeframe", y="num_txs", color="platform",
-    title="Stacked Transactions Over Time", barmode="stack"
+fig_txs_stacked = px.bar(
+    grouped_time,
+    x="period", y="num_txs", color="platform",
+    title="📦 Number of Transfers Over Time",
 )
-col1.plotly_chart(fig_txs, use_container_width=True)
+fig_txs_stacked.update_layout(barmode="stack")
 
-# Volume
-fig_vol = px.bar(
-    grouped, x="timeframe", y="volume", color="platform",
-    title="Stacked Volume Over Time", barmode="stack"
+fig_volume_stacked = px.bar(
+    grouped_time,
+    x="period", y="volume", color="platform",
+    title="💰 Volume of Transfers Over Time (USD)",
 )
-col2.plotly_chart(fig_vol, use_container_width=True)
+fig_volume_stacked.update_layout(barmode="stack")
 
-# --- Row 2: Cumulative Line Charts ---
-st.subheader("📈 Cumulative Transactions & Volume Over Time")
+col1.plotly_chart(fig_txs_stacked, use_container_width=True)
+col2.plotly_chart(fig_volume_stacked, use_container_width=True)
 
-# Sort for cumulative sum
-df_sorted = df.sort_values(by=["platform", "timeframe"])
+# ====================
+# Row 2: Cumulative Area Charts
+# ====================
+st.subheader("📈 Cumulative Transfers by Platform")
 
-# Cumulative sum
-df_sorted["cum_volume"] = df_sorted.groupby("platform")["volume"].cumsum()
-df_sorted["cum_txs"] = df_sorted.groupby("platform")["num_txs"].cumsum()
+# Cumulative sum over time
+cumulative_df = grouped_time.sort_values("period").copy()
+cumulative_df["cum_volume"] = cumulative_df.groupby("platform")["volume"].cumsum()
+cumulative_df["cum_num_txs"] = cumulative_df.groupby("platform")["num_txs"].cumsum()
 
-col3, col4 = st.columns(2)
+col1, col2 = st.columns(2)
 
-# Cumulative volume
-fig_cum_vol = px.line(
-    df_sorted, x="timeframe", y="cum_volume", color="platform",
-    title="Cumulative Volume Over Time"
+fig_cum_txs = px.area(
+    cumulative_df, x="period", y="cum_num_txs", color="platform",
+    title="🔁 Cumulative Transactions Over Time"
 )
-col3.plotly_chart(fig_cum_vol, use_container_width=True)
 
-# Cumulative transactions
-fig_cum_txs = px.line(
-    df_sorted, x="timeframe", y="cum_txs", color="platform",
-    title="Cumulative Transactions Over Time"
+fig_cum_volume = px.area(
+    cumulative_df, x="period", y="cum_volume", color="platform",
+    title="💸 Cumulative Volume Over Time (USD)"
 )
-col4.plotly_chart(fig_cum_txs, use_container_width=True)
 
-# --- Row 3: Sorted Bar Charts (Total per Platform) ---
-st.subheader("📦 Total Transactions & Volume by Platform (Filtered by Time Period)")
+col1.plotly_chart(fig_cum_txs, use_container_width=True)
+col2.plotly_chart(fig_cum_volume, use_container_width=True)
 
-# Aggregate total per platform
-total_by_platform = df.groupby("platform").agg({
-    "num_txs": "sum",
-    "volume": "sum"
+# ====================
+# Row 3: Total Volume & TXs by Platform
+# ====================
+st.subheader("🏁 Total Transfers by Platform")
+
+total_by_platform = platform_df.groupby("platform").agg({
+    "volume": "sum",
+    "num_txs": "sum"
 }).reset_index()
 
-# Sort
-total_txs_sorted = total_by_platform.sort_values(by="num_txs", ascending=False)
-total_vol_sorted = total_by_platform.sort_values(by="volume", ascending=False)
+# مرتب‌سازی
+total_by_platform = total_by_platform.sort_values("num_txs", ascending=False)
 
-col5, col6 = st.columns(2)
+col1, col2 = st.columns(2)
 
-# Bar chart: Total Transactions
-fig_total_txs = px.bar(
-    total_txs_sorted,
-    x="platform", y="num_txs", text="num_txs",
-    color="platform", title="Total Transactions per Platform"
+fig_bar_txs = px.bar(
+    total_by_platform,
+    x="platform", y="num_txs", color="platform", text="num_txs",
+    title="📦 Total Transactions per Platform"
 )
-fig_total_txs.update_traces(textposition="outside")
-fig_total_txs.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
-col5.plotly_chart(fig_total_txs, use_container_width=True)
+fig_bar_txs.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+fig_bar_txs.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
 
-# Bar chart: Total Volume
-fig_total_vol = px.bar(
-    total_vol_sorted,
-    x="platform", y="volume", text="volume",
-    color="platform", title="Total Volume per Platform"
+fig_bar_vol = px.bar(
+    total_by_platform.sort_values("volume", ascending=False),
+    x="platform", y="volume", color="platform", text="volume",
+    title="💰 Total Volume per Platform (USD)"
 )
-fig_total_vol.update_traces(textposition="outside")
-fig_total_vol.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
-col6.plotly_chart(fig_total_vol, use_container_width=True)
+fig_bar_vol.update_traces(texttemplate='%{text:.2s}', textposition='outside')
+fig_bar_vol.update_layout(uniformtext_minsize=8, uniformtext_mode='hide')
+
+col1.plotly_chart(fig_bar_txs, use_container_width=True)
+col2.plotly_chart(fig_bar_vol, use_container_width=True)
+
