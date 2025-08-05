@@ -34,39 +34,66 @@ start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 
 # -------------------------------------------------------------------------------------------------------------------------
-# -------------------------------------------------------------------------------------------------------------------------
-# -------------------------------------------------------------------------------------------------------------------------
-# --- Extract and Flatten Nested API Structure -------------------------------------------------------------------------
-@st.cache_data
-def load_and_flatten_api_data():
-    urls = [
+# --- Platform & API Mapping --------------------------------------------------------------------------------------------
+platform_apis = {
+    "Interchain Token Service": [
         "https://api.axelarscan.io/gmp/GMPStatsByChains?contractAddress=0xB5FB4BE02232B1bBA4dC8f81dc24C26980dE9e3C",
         "https://api.axelarscan.io/gmp/GMPStatsByChains?contractAddress=axelar1aqcj54lzz0rk22gvqgcn8fr5tx4rzwdv5wv5j9dmnacgefvd7wzsy2j2mr"
+    ],
+    "Squid": [
+        "https://api.axelarscan.io/gmp/GMPStatsByChains?contractAddress=0xce16F69375520ab01377ce7B88f5BA8C48F8D666",
+        "https://api.axelarscan.io/gmp/GMPStatsByChains?contractAddress=0xdf4fFDa22270c12d0b5b3788F1669D709476111E",
+        "https://api.axelarscan.io/gmp/GMPStatsByChains?contractAddress=0xe6B3949F9bBF168f4E3EFc82bc8FD849868CC6d8"
+    ],
+    "MintDAO Bridge": [
+        "https://api.axelarscan.io/gmp/GMPStatsByChains?contractAddress=0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56"
+    ],
+    "Prime Protocol": [
+        "https://api.axelarscan.io/gmp/GMPStatsByChains?contractAddress=0xbe54BaFC56B468d4D20D609F0Cf17fFc56b99913"
+    ],
+    "The Junkyard": [
+        "https://api.axelarscan.io/gmp/GMPStatsByChains?contractAddress=0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44"
+    ],
+    "Nya Bridge": [
+        "https://api.axelarscan.io/gmp/GMPStatsByChains?contractAddress=0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609"
+    ],
+    "eesee.io": [
+        "https://api.axelarscan.io/gmp/GMPStatsByChains?contractAddress=0xEac19c899098951fc6d0e6a7832b090474E2C292"
     ]
+}
 
+# -------------------------------------------------------------------------------------------------------------------------
+# --- Platform Selection -----------------------------------------------------------------------------------------------
+st.sidebar.subheader("📦 Select Platform or Service")
+selected_platform = st.sidebar.selectbox("Choose a platform to explore:", list(platform_apis.keys()))
+
+# -------------------------------------------------------------------------------------------------------------------------
+# --- Load and Normalize Data for Selected Platform --------------------------------------------------------------------
+@st.cache_data
+def load_platform_data(api_urls):
     records = []
-    for url in urls:
+    for url in api_urls:
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()
-            for source_entry in data["source_chains"]:
-                source_chain = source_entry["key"]
-                for dest in source_entry.get("destination_chains", []):
-                    dest_chain = dest["key"]
-                    volume = dest["volume"]
-                    num_txs = dest["num_txs"]
-                    records.append({
-                        "Source Chain": source_chain,
-                        "Destination Chain": dest_chain,
-                        "Volume of Transfers (USD)": volume,
-                        "Number of Transfers": num_txs,
-                        "Path": f"{source_chain} ➡ {dest_chain}"
-                    })
+            if "source_chains" in data:
+                for source_entry in data["source_chains"]:
+                    source_chain = source_entry["key"]
+                    for dest in source_entry.get("destination_chains", []):
+                        dest_chain = dest["key"]
+                        volume = dest["volume"]
+                        num_txs = dest["num_txs"]
+                        records.append({
+                            "Source Chain": source_chain,
+                            "Destination Chain": dest_chain,
+                            "Volume of Transfers (USD)": volume,
+                            "Number of Transfers": num_txs,
+                            "Path": f"{source_chain} ➡ {dest_chain}"
+                        })
+    return pd.DataFrame(records)
 
-    df = pd.DataFrame(records)
-    return df
+df_transfers = load_platform_data(platform_apis[selected_platform])
 
-df_transfers = load_and_flatten_api_data()
 
 # --- KPIs -------------------------------------------------------------------------------------------------------------
 col1, col2, col3 = st.columns(3)
