@@ -234,7 +234,6 @@ else:
     st.warning("No data found for the selected period.")
 # --------------------------------------------------------------------------------------------------------------------------------
 
-# 
 emoji_index = ['🥇', '🥈', '🥉', '🏅', '🎖']
 
 def get_top5_table(df, metric, service_type):
