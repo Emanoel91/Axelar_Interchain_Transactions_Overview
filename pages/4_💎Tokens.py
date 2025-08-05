@@ -237,33 +237,23 @@ else:
 emoji_index = ['🥇', '🥈', '🥉', '🏅', '🎖']
 
 def get_top5_table(df, metric, service_type):
-    # اگر ستون موردنظر اصلاً وجود نداشت، دیتافریم خالی برگردان
     if metric not in df.columns:
         return pd.DataFrame(columns=["SYMBOL", metric])
-    
+
     df_filtered = df[
         (df["SERVICE"] == service_type) &
-        (df[metric].notna()) &                # NaNهای واقعی
-        (df[metric] != 'nan') &               # به صورت رشته
-        (df[metric] != 'None') &
-        (df[metric] != None) &
-        (df[metric] != '')                    # رشته خالی
+        (df[metric].notna())
     ].copy()
 
-    # اگر ستون به صورت رشته ذخیره شده ولی عددی باشه، تبدیلش کن
+    # اطمینان از عددی بودن داده‌ها
     df_filtered[metric] = pd.to_numeric(df_filtered[metric], errors='coerce')
-    
-    # بعد از تبدیل، دوباره NaNها حذف بشن
     df_filtered = df_filtered[df_filtered[metric].notna()]
 
-    # مرتب‌سازی و بازگرداندن
     df_sorted = df_filtered.sort_values(by=metric, ascending=False).head(5).copy()
     df_sorted.reset_index(drop=True, inplace=True)
     df_sorted.index = emoji_index[:len(df_sorted)]
 
     return df_sorted[["SYMBOL", metric]]
-
-
 
 # ---  tables for GMP ---
 st.subheader("🏆 Top 5 Tokens via **GMP Service**")
