@@ -105,11 +105,20 @@ with col3:
 # --- Display Transfer Table -------------------------------------------------------------------------------------------
 st.subheader("📋 Transfer Details Table")
 
+# مرتب‌سازی و شماره‌گذاری
 df_table = df_transfers[["Path", "Volume of Transfers (USD)", "Number of Transfers"]].sort_values(
     by="Volume of Transfers (USD)", ascending=False).reset_index(drop=True)
-df_table.index += 1  
+df_table.index += 1  # شروع اندیس از 1
 
-st.dataframe(df_table, use_container_width=True)
+# قالب‌بندی عددی: جداکننده هزارگان و دو رقم اعشار
+formatted_df = df_table.style.format({
+    "Volume of Transfers (USD)": "{:,.2f}",
+    "Number of Transfers": "{:,.0f}"
+})
+
+# نمایش جدول
+st.dataframe(formatted_df, use_container_width=True)
+
 
 # --- Horizontal Bar Chart ------------------------------------------------------------------------
 # --- Top N Selection ------------------------------------------------------------------------------------------
