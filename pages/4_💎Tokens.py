@@ -234,26 +234,3 @@ else:
     st.warning("No data found for the selected period.")
 
 # -------------------------------------------------------------------------------------------------------------------------------------
-st.subheader("🏅 Top Tokens by Each Metric (Aggregated Over All Services)")
-
-# مرحله ۱: تجمیع داده‌ها بر اساس SYMBOL
-df_top_tokens = df_token_stats.groupby("SYMBOL")[[
-    "Transfers Count", "Users Count", 
-    "Transfers Volume (USD)", "Transfer Fees (USD)"
-]].sum().sort_values(by="Transfers Volume (USD)", ascending=False)
-
-# مرحله ۲: نمایش جداگانه top 5 برای هر معیار
-metrics = {
-    "Transfers Count": "📦 Transfers Count",
-    "Users Count": "👥 Users Count",
-    "Transfers Volume (USD)": "💰 Transfer Volume (USD)",
-    "Transfer Fees (USD)": "🧾 Transfer Fees (USD)"
-}
-
-for metric, label in metrics.items():
-    st.markdown(f"#### {label} – Top 5 Tokens")
-    st.dataframe(
-        df_top_tokens.sort_values(by=metric, ascending=False)[[metric]].head(5),
-        use_container_width=True
-    )
-
