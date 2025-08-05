@@ -210,7 +210,7 @@ def load_token_transfer_stats(start_date, end_date):
 df_token_stats = load_token_transfer_stats(start_date, end_date)
 
 if not df_token_stats.empty:
-    # تنظیم ایندکس از 1 شروع شود
+    
     df_token_stats.index = range(1, len(df_token_stats) + 1)
 
     # Formatting numbers with thousands separator
@@ -232,61 +232,3 @@ if not df_token_stats.empty:
 
 else:
     st.warning("No data found for the selected period.")
-# --------------------------------------------------------------------------------------------------------------------------------
-
-emoji_index = ['🥇', '🥈', '🥉', '🏅', '🎖']
-
-def get_top5_table(df, metric, service_type):
-    if metric not in df.columns:
-        return pd.DataFrame(columns=["SYMBOL", metric])
-
-    df_filtered = df[
-        (df["SERVICE"] == service_type) &
-        (df[metric].notna())
-    ].copy()
-
-    # اطمینان از عددی بودن داده‌ها
-    df_filtered[metric] = pd.to_numeric(df_filtered[metric], errors='coerce')
-    df_filtered = df_filtered[df_filtered[metric].notna()]
-
-    df_sorted = df_filtered.sort_values(by=metric, ascending=False).head(5).copy()
-    df_sorted.reset_index(drop=True, inplace=True)
-    df_sorted.index = emoji_index[:len(df_sorted)]
-
-    return df_sorted[["SYMBOL", metric]]
-
-# ---  tables for GMP ---
-st.subheader("🏆 Top 5 Tokens via **GMP Service**")
-
-col1, col2 = st.columns(2)
-with col1:
-    st.markdown("#### 📦 By Transfers Count")
-    st.dataframe(get_top5_table(df_token_stats, "Transfers Count", "GMP"), use_container_width=True)
-
-    st.markdown("#### 👥 By Users Count")
-    st.dataframe(get_top5_table(df_token_stats, "Users Count", "GMP"), use_container_width=True)
-
-with col2:
-    st.markdown("#### 💰 By Transfer Volume (USD)")
-    st.dataframe(get_top5_table(df_token_stats, "Transfers Volume (USD)", "GMP"), use_container_width=True)
-
-    st.markdown("#### 🧾 By Transfer Fees (USD)")
-    st.dataframe(get_top5_table(df_token_stats, "Transfer Fees (USD)", "GMP"), use_container_width=True)
-
-# --- tables for Token Transfers ---
-st.subheader("🏆 Top 5 Tokens via **Token Transfers Service**")
-
-col3, col4 = st.columns(2)
-with col3:
-    st.markdown("#### 📦 By Transfers Count")
-    st.dataframe(get_top5_table(df_token_stats, "Transfers Count", "Token Transfers"), use_container_width=True)
-
-    st.markdown("#### 👥 By Users Count")
-    st.dataframe(get_top5_table(df_token_stats, "Users Count", "Token Transfers"), use_container_width=True)
-
-with col4:
-    st.markdown("#### 💰 By Transfer Volume (USD)")
-    st.dataframe(get_top5_table(df_token_stats, "Transfers Volume (USD)", "Token Transfers"), use_container_width=True)
-
-    st.markdown("#### 🧾 By Transfer Fees (USD)")
-    st.dataframe(get_top5_table(df_token_stats, "Transfer Fees (USD)", "Token Transfers"), use_container_width=True)
