@@ -79,7 +79,13 @@ with col3:
 
 # --- Display Transfer Table -------------------------------------------------------------------------------------------
 st.subheader("📋 Transfer Details Table")
-st.dataframe(df_transfers[["Path", "Volume of Transfers (USD)", "Number of Transfers"]].sort_values(by="Volume of Transfers (USD)", ascending=False), use_container_width=True)
+
+# مرتب‌سازی جدول و ریست ایندکس از 1
+df_table = df_transfers[["Path", "Volume of Transfers (USD)", "Number of Transfers"]].sort_values(
+    by="Volume of Transfers (USD)", ascending=False).reset_index(drop=True)
+df_table.index += 1  # شماره‌گذاری از 1
+
+st.dataframe(df_table, use_container_width=True)
 
 # --- Horizontal Bar Chart: Number of Transfers ------------------------------------------------------------------------
 st.subheader("📦 Transfers per Path (Number)")
