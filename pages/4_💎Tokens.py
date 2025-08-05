@@ -250,17 +250,17 @@ st.subheader("🏆 Top 5 Tokens via **GMP Service**")
 col1, col2 = st.columns(2)
 with col1:
     st.markdown("#### 📦 By Transfers Count")
-    st.dataframe(get_top5_table(df_tokens, "Transfers Count", "GMP"), use_container_width=True)
+    st.dataframe(get_top5_table(df_token_stats, "Transfers Count", "GMP"), use_container_width=True)
 
     st.markdown("#### 👥 By Users Count")
-    st.dataframe(get_top5_table(df_tokens, "Users Count", "GMP"), use_container_width=True)
+    st.dataframe(get_top5_table(df_token_stats, "Users Count", "GMP"), use_container_width=True)
 
 with col2:
     st.markdown("#### 💰 By Transfer Volume (USD)")
-    st.dataframe(get_top5_table(df_tokens, "Transfers Volume (USD)", "GMP"), use_container_width=True)
+    st.dataframe(get_top5_table(df_token_stats, "Transfers Volume (USD)", "GMP"), use_container_width=True)
 
     st.markdown("#### 🧾 By Transfer Fees (USD)")
-    st.dataframe(get_top5_table(df_tokens, "Transfer Fees (USD)", "GMP"), use_container_width=True)
+    st.dataframe(get_top5_table(df_token_stats, "Transfer Fees (USD)", "GMP"), use_container_width=True)
 
 # --- tables for Token Transfers ---
 st.subheader("🏆 Top 5 Tokens via **Token Transfers Service**")
@@ -268,14 +268,14 @@ st.subheader("🏆 Top 5 Tokens via **Token Transfers Service**")
 col3, col4 = st.columns(2)
 with col3:
     st.markdown("#### 📦 By Transfers Count")
-    st.dataframe(get_top5_table(df_tokens, "Transfers Count", "Token Transfers"), use_container_width=True)
+    st.dataframe(get_top5_table(df_token_stats, "Transfers Count", "Token Transfers"), use_container_width=True)
 
     st.markdown("#### 👥 By Users Count")
-    st.dataframe(get_top5_table(df_tokens, "Users Count", "Token Transfers"), use_container_width=True)
+    st.dataframe(get_top5_table(df_token_stats, "Users Count", "Token Transfers"), use_container_width=True)
 
 with col4:
     st.markdown("#### 💰 By Transfer Volume (USD)")
-    st.dataframe(get_top5_table(df_tokens, "Transfers Volume (USD)", "Token Transfers"), use_container_width=True)
+    st.dataframe(get_top5_table(df_token_stats, "Transfers Volume (USD)", "Token Transfers"), use_container_width=True)
 
     st.markdown("#### 🧾 By Transfer Fees (USD)")
-    st.dataframe(get_top5_table(df_tokens, "Transfer Fees (USD)", "Token Transfers"), use_container_width=True)
+    st.dataframe(get_top5_table(df_token_stats, "Transfer Fees (USD)", "Token Transfers"), use_container_width=True)
