@@ -77,7 +77,7 @@ def load_token_transfer_stats(start_date, end_date):
       FROM axelar.axelscan.fact_transfers
       WHERE status = 'executed'
         AND simplified_status = 'received'
-        AND created_at::date>={start_date} AND created_at::date<={end_date}
+        AND created_at::date>='{start_date}' AND created_at::date<='{end_date}'
 
       UNION ALL
 
@@ -123,7 +123,7 @@ def load_token_transfer_stats(start_date, end_date):
       FROM axelar.axelscan.fact_gmp 
       WHERE status = 'executed'
         AND simplified_status = 'received'
-        AND created_at::date>={start_date} AND created_at::date<={end_date}
+        AND created_at::date>='{start_date}' AND created_at::date<='{end_date}'
     )
 
     SELECT 
