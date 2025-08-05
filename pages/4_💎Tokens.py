@@ -237,11 +237,11 @@ else:
 emoji_index = ['🥇', '🥈', '🥉', '🏅', '🎖']
 
 def get_top5_table(df, metric, service_type):
-    df_filtered = df[df["service"] == service_type]
+    df_filtered = df[df["SERVICE"] == service_type]
     df_sorted = df_filtered.sort_values(by=metric, ascending=False).head(5).copy()
     df_sorted.reset_index(drop=True, inplace=True)
     df_sorted.index = emoji_index[:len(df_sorted)]
-    return df_sorted[["symbol", metric]]
+    return df_sorted[["SYMBOL", metric]]
 
 # ---  tables for GMP ---
 st.subheader("🏆 Top 5 Tokens via **GMP Service**")
