@@ -165,7 +165,7 @@ filtered_df = df_transfers[
 ]
 
 # --- Heatmap: Volume by Source & Destination --------------------------------------------------------------------------
-st.subheader("🔥 Heatmap of Transfer Volume (USD)")
+# -- st.subheader("🔥 Heatmap of Transfer Volume (USD)")
 pivot_vol = filtered_df.pivot_table(
     index="Destination Chain",
     columns="Source Chain",
@@ -183,7 +183,7 @@ fig_heatmap_vol = px.imshow(
 st.plotly_chart(fig_heatmap_vol, use_container_width=True)
 
 # --- Heatmap: Number of Transfers by Source & Destination -------------------------------------------------------------
-st.subheader("📈 Heatmap of Number of Transfers")
+# -- st.subheader("📈 Heatmap of Number of Transfers")
 pivot_txs = filtered_df.pivot_table(
     index="Destination Chain",
     columns="Source Chain",
