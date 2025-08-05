@@ -80,35 +80,46 @@ with col3:
 # --- Display Transfer Table -------------------------------------------------------------------------------------------
 st.subheader("📋 Transfer Details Table")
 
-# مرتب‌سازی جدول و ریست ایندکس از 1
 df_table = df_transfers[["Path", "Volume of Transfers (USD)", "Number of Transfers"]].sort_values(
     by="Volume of Transfers (USD)", ascending=False).reset_index(drop=True)
-df_table.index += 1  # شماره‌گذاری از 1
+df_table.index += 1  
 
 st.dataframe(df_table, use_container_width=True)
 
-# --- Horizontal Bar Chart: Number of Transfers ------------------------------------------------------------------------
-st.subheader("📦 Transfers per Path (Number)")
-fig_txs = px.bar(
-    df_transfers.sort_values("Number of Transfers", ascending=True),
-    x="Number of Transfers",
-    y="Path",
-    orientation='h',
-    title="Number of Transfers per Path"
-)
-st.plotly_chart(fig_txs, use_container_width=True)
+# --- Horizontal Bar Chart ------------------------------------------------------------------------
+# --- Top 10 Paths for Charts ------------------------------------------------------------------------------------------
+st.subheader("📊 Top 10 Transfer Paths")
 
-# --- Horizontal Bar Chart: Volume of Transfers ------------------------------------------------------------------------
-st.subheader("💰 Transfers per Path (Volume in USD)")
-fig_vol = px.bar(
-    df_transfers.sort_values("Volume of Transfers (USD)", ascending=True),
-    x="Volume of Transfers (USD)",
-    y="Path",
-    orientation='h',
-    title="Volume of Transfers per Path"
-)
-st.plotly_chart(fig_vol, use_container_width=True)
+# انتخاب ۱۰ مسیر برتر بر اساس تعداد تراکنش و حجم تراکنش
+top10_by_txs = df_transfers.sort_values("Number of Transfers", ascending=False).head(10)
+top10_by_volume = df_transfers.sort_values("Volume of Transfers (USD)", ascending=False).head(10)
 
+# ایجاد دو ستون کنار هم
+col1, col2 = st.columns(2)
+
+with col1:
+    fig_txs = px.bar(
+        top10_by_txs.sort_values("Number of Transfers"),  # برای داشتن ترتیب از پایین به بالا
+        x="Number of Transfers",
+        y="Path",
+        orientation='h',
+        title="Top 10 Paths by Number of Transfers",
+        labels={"Number of Transfers": "Number of Transfers", "Path": "Transfer Path"}
+    )
+    fig_txs.update_layout(margin=dict(l=0, r=0, t=40, b=0))
+    st.plotly_chart(fig_txs, use_container_width=True)
+
+with col2:
+    fig_vol = px.bar(
+        top10_by_volume.sort_values("Volume of Transfers (USD)"),  # برای ترتیب بهتر
+        x="Volume of Transfers (USD)",
+        y="Path",
+        orientation='h',
+        title="Top 10 Paths by Volume (USD)",
+        labels={"Volume of Transfers (USD)": "Volume (USD)", "Path": "Transfer Path"}
+    )
+    fig_vol.update_layout(margin=dict(l=0, r=0, t=40, b=0))
+    st.plotly_chart(fig_vol, use_container_width=True)
 
 # --- Heatmap: Volume by Source & Destination --------------------------------------------------------------------------
 st.subheader("🔥 Heatmap of Transfer Volume (USD)")
