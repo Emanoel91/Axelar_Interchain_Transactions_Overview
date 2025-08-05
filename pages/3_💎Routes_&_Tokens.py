@@ -15,8 +15,7 @@ st.set_page_config(
 # --- Title & Info Messages ---------------------------------------------------------------------------------------------
 st.title("💎Routes & Tokens")
 
-st.info("📊 Charts initially display data for a default time range. Select a custom range to view results for your desired period.")
-st.info("⏳ On-chain data retrieval may take a few moments. Please wait while the results load.")
+st.info("🔔To view the most recent updates, click on the '...' in the top-right corner of the page and select 'Rerun'.")
 
 # --- Snowflake Connection ----------------------------------------------------------------------------------------------
 conn = snowflake.connector.connect(
