@@ -66,6 +66,7 @@ selected_platform = st.selectbox(
     index=0
 )
 
+st.info("Select a platform above to load its cross-chain transaction data.")
 
 # -------------------------------------------------------------------------------------------------------------------------
 # --- Load and Normalize Data for Selected Platform --------------------------------------------------------------------
