@@ -210,17 +210,25 @@ def load_token_transfer_stats(start_date, end_date):
 df_token_stats = load_token_transfer_stats(start_date, end_date)
 
 if not df_token_stats.empty:
-
+    # تنظیم ایندکس از 1 شروع شود
     df_token_stats.index = range(1, len(df_token_stats) + 1)
 
     # Formatting numbers with thousands separator
     for col in ["Transfers Count", "Users Count", "Transfers Volume (USD)", "Transfers Volume", "Transfer Fees (USD)", "Number of Paths"]:
         df_token_stats[col] = df_token_stats[col].apply(lambda x: f"{x:,}")
 
-    # Avg Transfer Fee (USD) Holds with 3 decimal places (previously rounded)
     df_token_stats["Avg Transfer Fee (USD)"] = df_token_stats["Avg Transfer Fee (USD)"].map("{:,.3f}".format)
 
+    def highlight_rows(row):
+        color = ''
+        if row["SERVICE"] == "GMP":
+            color = '#f8b88c'
+        elif row["SERVICE"] == "Token Transfers":
+            color = '#7cd5fd'
+        return [f'background-color: {color}' for _ in row]
+
     st.subheader("Token transfer statistics using Axelar cross-chain services")
-    st.dataframe(df_token_stats, use_container_width=True)
+    st.dataframe(df_token_stats.style.apply(highlight_rows, axis=1), use_container_width=True)
+
 else:
     st.warning("No data found for the selected period.")
