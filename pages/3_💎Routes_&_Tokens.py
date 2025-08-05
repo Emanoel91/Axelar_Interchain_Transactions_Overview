@@ -58,9 +58,14 @@ platform_apis = {
 }
 
 # -------------------------------------------------------------------------------------------------------------------------
-# --- Platform Selection -----------------------------------------------------------------------------------------------
-st.sidebar.subheader("📦 Select Platform or Service")
-selected_platform = st.sidebar.selectbox("Choose a platform to explore:", list(platform_apis.keys()))
+# --- Platform Selection (Top of Page) ---------------------------------------------------------------------------------
+st.markdown("### 🔍 Select a Platform or Service to Explore")
+selected_platform = st.selectbox(
+    "Choose a platform to load data for:",
+    options=list(platform_apis.keys()),
+    index=0
+)
+
 
 # -------------------------------------------------------------------------------------------------------------------------
 # --- Load and Normalize Data for Selected Platform --------------------------------------------------------------------
