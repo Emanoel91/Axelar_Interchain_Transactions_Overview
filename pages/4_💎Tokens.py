@@ -558,23 +558,22 @@ limit 5
     """
     return pd.read_sql(query, conn)
 
-# بارگذاری داده‌ها با فیلتر تاریخ انتخابی
 df_top_counts = load_top5_counts(start_date, end_date)
 df_top_users  = load_top5_users(start_date, end_date)
 
-# تابع قالب‌بندی جدول با اندیس ایموجی و جداکننده هزارگان
-def render_top5(df, metric, title):
+def render_top5(df, metric, title, container):
     if df.empty:
-        st.warning(f"No data for {title}")
+        container.warning(f"No data for {title}")
         return
     df = df.reset_index(drop=True).copy()
     df.index = emoji_index[:len(df)]
-    # قالب‌بندی عدد
+
     df[metric] = df[metric].apply(lambda x: f"{x:,}")
     df = df[["Symbol", "Service", metric]]
-    st.subheader(title)
-    st.dataframe(df, use_container_width=True)
+    container.subheader(title)
+    container.dataframe(df, use_container_width=True)
 
-# نمایش دو جدول در صفحه
-render_top5(df_top_counts, "Transfers Count", "Top 5 Tokens By Transfers Count")
-render_top5(df_top_users,  "Users Count",     "Top 5 Tokens By Users Count")
+col1, col2 = st.columns(2)
+
+render_top5(df_top_counts, "Transfers Count", "Top 5 Tokens By Transfers Count", col1)
+render_top5(df_top_users,  "Users Count",     "Top 5 Tokens By Users Count", col2)
