@@ -77,6 +77,7 @@ def load_token_transfer_stats(start_date, end_date):
       FROM axelar.axelscan.fact_transfers
       WHERE status = 'executed'
         AND simplified_status = 'received'
+        AND created_at::date>={start_date} AND created_at::date<={end_date}
 
       UNION ALL
 
@@ -122,6 +123,7 @@ def load_token_transfer_stats(start_date, end_date):
       FROM axelar.axelscan.fact_gmp 
       WHERE status = 'executed'
         AND simplified_status = 'received'
+        AND created_at::date>={start_date} AND created_at::date<={end_date}
     )
 
     SELECT 
@@ -197,9 +199,7 @@ def load_token_transfer_stats(start_date, end_date):
       ROUND(AVG(fee), 3) AS "Avg Transfer Fee (USD)",
       COUNT(DISTINCT (source_chain || '➡' || destination_chain)) AS "Number of Paths"
     FROM axelar_service
-    WHERE created_at::DATE >= '{start_date}'
-      AND created_at::DATE <= '{end_date}'
-      AND raw_asset IS NOT NULL
+    WHERE raw_asset IS NOT NULL
     GROUP BY 1, 2
     ORDER BY 3 DESC
     """
