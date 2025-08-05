@@ -189,8 +189,8 @@ def load_token_transfer_stats(start_date, end_date):
         WHEN raw_asset='wsteth-wei' THEN 'wstETH'
         WHEN raw_asset='yield-eth-wei' THEN 'yieldETH' 
         ELSE raw_asset 
-      END AS symbol,
-      service, 
+      END AS "symbol",
+      "service", 
       COUNT(DISTINCT id) AS "Transfers Count",
       COUNT(DISTINCT user) AS "Users Count", 
       ROUND(SUM(amount_usd)) AS "Transfers Volume (USD)",
@@ -241,7 +241,7 @@ def get_top5_table(df, metric, service_type):
     df_sorted = df_filtered.sort_values(by=metric, ascending=False).head(5).copy()
     df_sorted.reset_index(drop=True, inplace=True)
     df_sorted.index = emoji_index[:len(df_sorted)]
-    return df_sorted[["SYMBOL", metric]]
+    return df_sorted[["symbol", metric]]
 
 # ---  tables for GMP ---
 st.subheader("🏆 Top 5 Tokens via **GMP Service**")
