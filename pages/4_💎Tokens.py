@@ -70,7 +70,7 @@ def load_token_transfer_stats(start_date, end_date):
           ELSE NULL
         END AS fee,
 
-        id, 
+        id,  
         'Token Transfers' AS service, 
         data:link:asset::STRING AS raw_asset
 
