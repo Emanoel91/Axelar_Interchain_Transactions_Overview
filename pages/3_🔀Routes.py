@@ -13,7 +13,7 @@ st.set_page_config(
 )
 
 # --- Title & Info Messages ---------------------------------------------------------------------------------------------
-st.title("💎Routes & Tokens")
+st.title("🔀Routes")
 
 st.info("🔔To view the most recent updates, click on the '...' in the top-right corner of the page and select 'Rerun'.")
 
@@ -58,7 +58,7 @@ platform_apis = {
 
 # -------------------------------------------------------------------------------------------------------------------------
 # --- Platform Selection (Top of Page) ---------------------------------------------------------------------------------
-st.markdown("### 🔍 Select a Platform or Service to Explore")
+# -- st.markdown("### 🔍 Select a Platform or Service to Explore")
 selected_platform = st.selectbox(
     "Choose a platform to load data for:",
     options=list(platform_apis.keys()),
