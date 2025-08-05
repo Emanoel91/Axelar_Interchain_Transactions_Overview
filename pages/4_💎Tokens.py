@@ -189,8 +189,8 @@ def load_token_transfer_stats(start_date, end_date):
         WHEN raw_asset='wsteth-wei' THEN 'wstETH'
         WHEN raw_asset='yield-eth-wei' THEN 'yieldETH' 
         ELSE raw_asset 
-      END AS "symbol",
-      service as "service", 
+      END AS symbol,
+      service, 
       COUNT(DISTINCT id) AS "Transfers Count",
       COUNT(DISTINCT user) AS "Users Count", 
       ROUND(SUM(amount_usd)) AS "Transfers Volume (USD)",
