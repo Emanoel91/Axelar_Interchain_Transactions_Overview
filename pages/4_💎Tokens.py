@@ -209,10 +209,6 @@ def load_token_transfer_stats(start_date, end_date):
 # --- Load data using selected date ---
 df_token_stats = load_token_transfer_stats(start_date, end_date)
 
-if not df_token_stats.empty:
-    # Add row number from 1 onwards
-    df_token_stats.insert(0, "ردیف", range(1, len(df_token_stats) + 1))
-
     # Formatting numbers with thousands separator
     for col in ["Transfers Count", "Users Count", "Transfers Volume (USD)", "Transfers Volume", "Transfer Fees (USD)", "Number of Paths"]:
         df_token_stats[col] = df_token_stats[col].apply(lambda x: f"{x:,}")
