@@ -123,15 +123,55 @@ with col2:
     fig_vol.update_layout(margin=dict(l=0, r=0, t=40, b=0))
     st.plotly_chart(fig_vol, use_container_width=True)
 
+# --- Heatmaps --------------------------------------------------------------------------
+# --- Heatmap Filters ---------------------------------------------------------------------------------------------------
+st.subheader("🎛️ Heatmap Filters")
+
+all_sources = sorted(df_transfers["Source Chain"].unique())
+all_destinations = sorted(df_transfers["Destination Chain"].unique())
+
+selected_sources = st.multiselect("Select Source Chains", options=all_sources, default=all_sources)
+selected_destinations = st.multiselect("Select Destination Chains", options=all_destinations, default=all_destinations)
+
+# فیلتر کردن داده‌ها بر اساس انتخاب کاربر
+filtered_df = df_transfers[
+    df_transfers["Source Chain"].isin(selected_sources) &
+    df_transfers["Destination Chain"].isin(selected_destinations)
+]
+
 # --- Heatmap: Volume by Source & Destination --------------------------------------------------------------------------
 st.subheader("🔥 Heatmap of Transfer Volume (USD)")
-pivot_vol = df_transfers.pivot_table(index="Destination Chain", columns="Source Chain", values="Volume of Transfers (USD)", aggfunc="sum", fill_value=0)
-fig_heatmap_vol = px.imshow(pivot_vol, text_auto=True, aspect="auto", color_continuous_scale='Viridis', title="Transfer Volume Heatmap")
+pivot_vol = filtered_df.pivot_table(
+    index="Destination Chain",
+    columns="Source Chain",
+    values="Volume of Transfers (USD)",
+    aggfunc="sum",
+    fill_value=0
+)
+fig_heatmap_vol = px.imshow(
+    pivot_vol,
+    text_auto=True,
+    aspect="auto",
+    color_continuous_scale='Viridis',
+    title="Transfer Volume Heatmap (Filtered)"
+)
 st.plotly_chart(fig_heatmap_vol, use_container_width=True)
 
 # --- Heatmap: Number of Transfers by Source & Destination -------------------------------------------------------------
 st.subheader("📈 Heatmap of Number of Transfers")
-pivot_txs = df_transfers.pivot_table(index="Destination Chain", columns="Source Chain", values="Number of Transfers", aggfunc="sum", fill_value=0)
-fig_heatmap_txs = px.imshow(pivot_txs, text_auto=True, aspect="auto", color_continuous_scale='Cividis', title="Transfer Count Heatmap")
+pivot_txs = filtered_df.pivot_table(
+    index="Destination Chain",
+    columns="Source Chain",
+    values="Number of Transfers",
+    aggfunc="sum",
+    fill_value=0
+)
+fig_heatmap_txs = px.imshow(
+    pivot_txs,
+    text_auto=True,
+    aspect="auto",
+    color_continuous_scale='Cividis',
+    title="Transfer Count Heatmap (Filtered)"
+)
 st.plotly_chart(fig_heatmap_txs, use_container_width=True)
 
