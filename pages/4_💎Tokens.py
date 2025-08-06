@@ -575,8 +575,8 @@ def render_top5(df, metric, title, container):
 
 col1, col2 = st.columns(2)
 
-render_top5(df_top_counts, "Transfers Count", "Top 5 Tokens By Transfers Count", col1)
-render_top5(df_top_users,  "Users Count",     "Top 5 Tokens By Users Count", col2)
+render_top5(df_top_counts, "Transfers Count", "🚀Top 5 Tokens By Transfers Count", col1)
+render_top5(df_top_users,  "Users Count",     "👥Top 5 Tokens By Users Count", col2)
 
 
 # -------------------------------------------------------------------------------------------------------------------------------------
@@ -924,7 +924,7 @@ def render_top5(df, metric, title, container):
 
 col1, col2 = st.columns(2)
 
-render_top5(df_top_counts, "Transfers Volume", "Top 5 Tokens By Transfers Volume", col1)
-render_top5(df_top_users,  "Transfer Fees",     "Top 5 Tokens By Transfer Fees", col2)
+render_top5(df_top_counts, "Transfers Volume", "💸Top 5 Tokens By Transfers Volume", col1)
+render_top5(df_top_users,  "Transfer Fees",     "⛽Top 5 Tokens By Transfer Fees", col2)
 
 
