@@ -136,27 +136,36 @@ with col2:
 
 # --- Row 4: Donut Charts ---------------------------------------------------------------------------------------------
 
-total_gmp_tx = grouped['gmp_num_txs'].sum()
-total_transfers_tx = grouped['transfers_num_txs'].sum()
-
-total_gmp_vol = grouped['gmp_volume'].sum()
-total_transfers_vol = grouped['transfers_volume'].sum()
+# ساخت DataFrame برای تراکنش‌ها
+tx_df = pd.DataFrame({
+    "Service": ["GMP", "Token Transfers"],
+    "Count": [total_gmp_tx, total_transfers_tx]
+})
 
 donut_tx = px.pie(
-    names=["GMP", "Token Transfers"],
-    values=[total_gmp_tx, total_transfers_tx],
+    tx_df,
+    names="Service",
+    values="Count",
     hole=0.5,
     title="Share of Total Transactions By Service",
     color_discrete_map={"GMP": "#ff7400", "Token Transfers": "#00a1f7"}
 )
 
+# ساخت DataFrame برای حجم
+vol_df = pd.DataFrame({
+    "Service": ["GMP", "Token Transfers"],
+    "Volume": [total_gmp_vol, total_transfers_vol]
+})
+
 donut_vol = px.pie(
-    names=["GMP", "Token Transfers"],
-    values=[total_gmp_vol, total_transfers_vol],
+    vol_df,
+    names="Service",
+    values="Volume",
     hole=0.5,
     title="Share of Total Volume By Service",
     color_discrete_map={"GMP": "#ff7400", "Token Transfers": "#00a1f7"}
 )
+
 
 col5, col6 = st.columns(2)
 col5.plotly_chart(donut_tx, use_container_width=True)
