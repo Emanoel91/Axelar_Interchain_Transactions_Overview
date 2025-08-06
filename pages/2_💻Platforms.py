@@ -105,7 +105,7 @@ agg_platform = df.groupby('platform').agg(
 ).reset_index()
 
 # --- Donut Charts ------------------------------------------------------------------------------------------------------
-st.markdown("## 🍩 Total Transfers by Platform")
+ 
 
 col1, col2 = st.columns(2)
 
@@ -117,15 +117,15 @@ with col1:
         title="Total Number of Transfers By Platform"
     )
     fig_tx.update_traces(
-        textinfo='percent',  # فقط درصد نمایش داده می‌شود (مناسب برای خوانایی)
-        textposition='inside',  # متن داخل دایره قرار می‌گیرد
+        textinfo='percent',  
+        textposition='inside',  
         insidetextorientation='radial',
-        textfont=dict(size=12),  # کوچک‌تر کردن فونت
-        pull=[0.01]*len(agg_platform)  # کمی فاصله برای جلوگیری از چسبندگی
+        textfont=dict(size=12), 
+        pull=[0.01]*len(agg_platform)  
     )
     fig_tx.update_layout(
         uniformtext_minsize=10,
-        margin=dict(t=40, b=0, l=0, r=0),  # کاهش حاشیه‌های بیرونی
+        margin=dict(t=40, b=0, l=0, r=0),  
         showlegend=True
     )
     st.plotly_chart(fig_tx, use_container_width=True)
@@ -162,7 +162,6 @@ pivot_txs = agg_time.pivot(index='period', columns='platform', values='total_txs
 pivot_vol = agg_time.pivot(index='period', columns='platform', values='total_volume').fillna(0)
 
 # --- Stacked Bar Charts -----------------------------------------------------------------------------------------------
-st.markdown("## 📊 Transfers Over Time by Platform")
 
 col3, col4 = st.columns(2)
 
