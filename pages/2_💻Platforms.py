@@ -117,10 +117,17 @@ with col1:
         title="Total Number of Transfers By Platform"
     )
     fig_tx.update_traces(
-        textinfo='label+percent+value',
-        insidetextorientation='auto'
+        textinfo='percent',  # فقط درصد نمایش داده می‌شود (مناسب برای خوانایی)
+        textposition='inside',  # متن داخل دایره قرار می‌گیرد
+        insidetextorientation='radial',
+        textfont=dict(size=12),  # کوچک‌تر کردن فونت
+        pull=[0.01]*len(agg_platform)  # کمی فاصله برای جلوگیری از چسبندگی
     )
-    fig_tx.update_layout(uniformtext_minsize=10, uniformtext_mode='hide')
+    fig_tx.update_layout(
+        uniformtext_minsize=10,
+        margin=dict(t=40, b=0, l=0, r=0),  # کاهش حاشیه‌های بیرونی
+        showlegend=True
+    )
     st.plotly_chart(fig_tx, use_container_width=True)
 
 with col2:
@@ -131,8 +138,16 @@ with col2:
         title="Total Volume of Transfers By Platform"
     )
     fig_vol.update_traces(
-        textinfo='label+percent+value',
-        insidetextorientation='auto'
+        textinfo='percent',
+        textposition='inside',
+        insidetextorientation='radial',
+        textfont=dict(size=12),
+        pull=[0.01]*len(agg_platform)
+    )
+    fig_vol.update_layout(
+        uniformtext_minsize=10,
+        margin=dict(t=40, b=0, l=0, r=0),
+        showlegend=True
     )
     st.plotly_chart(fig_vol, use_container_width=True)
 
