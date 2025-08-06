@@ -136,29 +136,23 @@ with col2:
 
 # --- Row 4: Donut Charts ---------------------------------------------------------------------------------------------
 
-tx_data = pd.DataFrame({
-    'Service': ['GMP', 'Token Transfers'],
-    'Count': [total_gmp_tx, total_transfers_tx]
-})
+total_gmp_tx = grouped['gmp_num_txs'].sum()
+total_transfers_tx = grouped['transfers_num_txs'].sum()
+
+total_gmp_vol = grouped['gmp_volume'].sum()
+total_transfers_vol = grouped['transfers_volume'].sum()
 
 donut_tx = px.pie(
-    tx_data,
-    names='Service',
-    values='Count',
+    names=["GMP", "Token Transfers"],
+    values=[total_gmp_tx, total_transfers_tx],
     hole=0.5,
     title="Share of Total Transactions By Service",
     color_discrete_map={"GMP": "#ff7400", "Token Transfers": "#00a1f7"}
 )
 
-vol_data = pd.DataFrame({
-    'Service': ['GMP', 'Token Transfers'],
-    'Volume': [total_gmp_vol, total_transfers_vol]
-})
-
 donut_vol = px.pie(
-    vol_data,
-    names='Service',
-    values='Volume',
+    names=["GMP", "Token Transfers"],
+    values=[total_gmp_vol, total_transfers_vol],
     hole=0.5,
     title="Share of Total Volume By Service",
     color_discrete_map={"GMP": "#ff7400", "Token Transfers": "#00a1f7"}
