@@ -33,102 +33,120 @@ timeframe = st.selectbox("Select Time Frame", ["month", "week", "day"])
 start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 
-# --- Load Axelar Service Volume & TXs from Dune API ---
+# --- Fetch Data from API --------------------------------------------------------------------------------------------
 @st.cache_data(ttl=3600)
-def load_service_data():
-    url = "https://api.dune.com/api/v1/query/5574227/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
+def load_data():
+    url = "https://api.axelarscan.io/api/interchainChart"
     response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        df = pd.DataFrame(data["result"]["rows"])
-        df["day"] = pd.to_datetime(df["day"])
-        df["volume"] = pd.to_numeric(df["volume"], errors="coerce")
-        df["num_txs"] = pd.to_numeric(df["num_txs"], errors="coerce")
-        return df
-    else:
-        st.error(f"Failed to fetch service data: {response.status_code}")
-        return pd.DataFrame(columns=["day", "volume", "num_txs", "service"])
+    json_data = response.json()
+    df = pd.DataFrame(json_data['data'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    return df
 
-# --- Load and Filter Service Data ---
-service_df_raw = load_service_data()
-service_df = service_df_raw[
-    (service_df_raw["day"].dt.date >= start_date) &
-    (service_df_raw["day"].dt.date <= end_date)
-].copy()
-service_df["timeframe"] = service_df["day"].dt.to_period(timeframe[0].upper()).dt.to_timestamp()
+df = load_data()
 
-# --- Row 1: Summary Metrics ---
-st.subheader("📦 Total Transfer Stats by Service")
+# --- Filter by date range ------------------------------------------------------------------------------------------
+df = df[(df['timestamp'] >= pd.to_datetime(start_date)) & (df['timestamp'] <= pd.to_datetime(end_date))]
 
+# --- Resample data based on timeframe ------------------------------------------------------------------------------
+if timeframe == "week":
+    df['period'] = df['timestamp'].dt.to_period('W').apply(lambda r: r.start_time)
+elif timeframe == "month":
+    df['period'] = df['timestamp'].dt.to_period('M').apply(lambda r: r.start_time)
+else:
+    df['period'] = df['timestamp']
+
+grouped = df.groupby('period').agg({
+    'gmp_num_txs': 'sum',
+    'gmp_volume': 'sum',
+    'transfers_num_txs': 'sum',
+    'transfers_volume': 'sum'
+}).reset_index()
+
+grouped['total_txs'] = grouped['gmp_num_txs'] + grouped['transfers_num_txs']
+grouped['total_volume'] = grouped['gmp_volume'] + grouped['transfers_volume']
+
+# --- KPI Section ---------------------------------------------------------------------------------------------------
+st.markdown("## 📦 Total Transfer Stats by Service")
 col1, col2, col3, col4 = st.columns(4)
+col1.metric("🔁 Total GMP Transactions", f"{grouped['gmp_num_txs'].sum():,}")
+col2.metric("🔄 Total Token Transfers Transactions", f"{grouped['transfers_num_txs'].sum():,}")
+col3.metric("💰 Total GMP Volume ($)", f"${grouped['gmp_volume'].sum():,.0f}")
+col4.metric("💸 Total Token Transfers Volume ($)", f"${grouped['transfers_volume'].sum():,.0f}")
 
-gmp_tx_count = service_df.loc[service_df["service"] == "GMP", "num_txs"].sum()
-token_tx_count = service_df.loc[service_df["service"] == "Token Transfers", "num_txs"].sum()
-gmp_volume = service_df.loc[service_df["service"] == "GMP", "volume"].sum()
-token_volume = service_df.loc[service_df["service"] == "Token Transfers", "volume"].sum()
+# --- Row 2: Transactions Over Time ----------------------------------------------------------------------------------
+st.markdown("## 📈 Transactions Over Time by Service")
 
-col1.metric("GMP Transactions", f"{gmp_tx_count:,.0f}")
-col2.metric("Token Transfers Transactions", f"{token_tx_count:,.0f}")
-col3.metric("GMP Volume ($)", f"${gmp_volume:,.0f}")
-col4.metric("Token Transfers Volume ($)", f"${token_volume:,.0f}")
+# Stacked bar + line
+fig1 = go.Figure()
+fig1.add_trace(go.Bar(x=grouped['period'], y=grouped['gmp_num_txs'], name='GMP', marker_color='#ff7400'))
+fig1.add_trace(go.Bar(x=grouped['period'], y=grouped['transfers_num_txs'], name='Token Transfers', marker_color='#00a1f7'))
+fig1.add_trace(go.Scatter(x=grouped['period'], y=grouped['total_txs'], name='Total', mode='lines+markers', marker_color='black'))
+fig1.update_layout(barmode='stack', title="Transactions By Service Over Time")
 
-# --- Row 2: TX Count Over Time ---
-st.subheader("📈 Transactions Over Time by Service")
+# Normalized stacked bar
+df_norm_tx = grouped.copy()
+df_norm_tx['gmp_norm'] = df_norm_tx['gmp_num_txs'] / df_norm_tx['total_txs']
+df_norm_tx['transfers_norm'] = df_norm_tx['transfers_num_txs'] / df_norm_tx['total_txs']
 
-txs_grouped = service_df.groupby(["timeframe", "service"])["num_txs"].sum().reset_index()
+fig2 = go.Figure()
+fig2.add_trace(go.Bar(x=df_norm_tx['period'], y=df_norm_tx['gmp_norm'], name='GMP', marker_color='#ff7400'))
+fig2.add_trace(go.Bar(x=df_norm_tx['period'], y=df_norm_tx['transfers_norm'], name='Token Transfers', marker_color='#00a1f7'))
+fig2.update_layout(barmode='stack', title="Normalized Transactions By Service Over Time", yaxis_tickformat='%')
 
-fig_txs = px.bar(
-    txs_grouped, x="timeframe", y="num_txs", color="service",
-    title="Transactions by Service Over Time",
+st.plotly_chart(fig1, use_container_width=True)
+st.plotly_chart(fig2, use_container_width=True)
+
+# --- Row 3: Volume Over Time ----------------------------------------------------------------------------------------
+st.markdown("## 💵 Volume Over Time by Service")
+
+fig3 = go.Figure()
+fig3.add_trace(go.Bar(x=grouped['period'], y=grouped['gmp_volume'], name='GMP', marker_color='#ff7400'))
+fig3.add_trace(go.Bar(x=grouped['period'], y=grouped['transfers_volume'], name='Token Transfers', marker_color='#00a1f7'))
+fig3.add_trace(go.Scatter(x=grouped['period'], y=grouped['total_volume'], name='Total', mode='lines+markers', marker_color='black'))
+fig3.update_layout(barmode='stack', title="Volume By Service Over Time")
+
+# Normalized volume bar
+df_norm_vol = grouped.copy()
+df_norm_vol['gmp_norm'] = df_norm_vol['gmp_volume'] / df_norm_vol['total_volume']
+df_norm_vol['transfers_norm'] = df_norm_vol['transfers_volume'] / df_norm_vol['total_volume']
+
+fig4 = go.Figure()
+fig4.add_trace(go.Bar(x=df_norm_vol['period'], y=df_norm_vol['gmp_norm'], name='GMP', marker_color='#ff7400'))
+fig4.add_trace(go.Bar(x=df_norm_vol['period'], y=df_norm_vol['transfers_norm'], name='Token Transfers', marker_color='#00a1f7'))
+fig4.update_layout(barmode='stack', title="Normalized Volume By Service Over Time", yaxis_tickformat='%')
+
+st.plotly_chart(fig3, use_container_width=True)
+st.plotly_chart(fig4, use_container_width=True)
+
+# --- Row 4: Donut Charts ---------------------------------------------------------------------------------------------
+st.markdown("## 🍩 Share Breakdown")
+
+total_gmp_tx = grouped['gmp_num_txs'].sum()
+total_transfers_tx = grouped['transfers_num_txs'].sum()
+
+total_gmp_vol = grouped['gmp_volume'].sum()
+total_transfers_vol = grouped['transfers_volume'].sum()
+
+donut_tx = px.pie(
+    names=["GMP", "Token Transfers"],
+    values=[total_gmp_tx, total_transfers_tx],
+    hole=0.5,
+    title="Share of Total Transactions By Service",
+    color_discrete_map={"GMP": "#ff7400", "Token Transfers": "#00a1f7"}
 )
-fig_txs_norm = px.bar(
-    txs_grouped, x="timeframe", y="num_txs", color="service",
-    title="Normalized Transactions by Service Over Time",
-    barmode="relative"
-)
-fig_txs_norm.update_layout(barmode="stack", barnorm="percent")
 
-col1, col2 = st.columns(2)
-col1.plotly_chart(fig_txs, use_container_width=True)
-col2.plotly_chart(fig_txs_norm, use_container_width=True)
-
-# --- Row 3: Volume Over Time ---
-
-volume_grouped = service_df.groupby(["timeframe", "service"])["volume"].sum().reset_index()
-
-fig_vol = px.bar(
-    volume_grouped, x="timeframe", y="volume", color="service",
-    title="Volume by Service Over Time",
-)
-fig_vol_norm = px.bar(
-    volume_grouped, x="timeframe", y="volume", color="service",
-    title="Normalized Volume by Service Over Time",
-    barmode="relative"
-)
-fig_vol_norm.update_layout(barmode="stack", barnorm="percent")
-
-col1, col2 = st.columns(2)
-col1.plotly_chart(fig_vol, use_container_width=True)
-col2.plotly_chart(fig_vol_norm, use_container_width=True)
-
-# --- Row 4: Donut Charts ---
-
-total_txs_share = service_df.groupby("service")["num_txs"].sum().reset_index()
-total_vol_share = service_df.groupby("service")["volume"].sum().reset_index()
-
-fig_donut_txs = px.pie(
-    total_txs_share, values="num_txs", names="service",
-    title="Share of Total Transactions by Service", hole=0.5
+donut_vol = px.pie(
+    names=["GMP", "Token Transfers"],
+    values=[total_gmp_vol, total_transfers_vol],
+    hole=0.5,
+    title="Share of Total Volume By Service",
+    color_discrete_map={"GMP": "#ff7400", "Token Transfers": "#00a1f7"}
 )
 
-fig_donut_vol = px.pie(
-    total_vol_share, values="volume", names="service",
-    title="Share of Total Volume by Service", hole=0.5
-)
-
-col1, col2 = st.columns(2)
-col1.plotly_chart(fig_donut_txs, use_container_width=True)
-col2.plotly_chart(fig_donut_vol, use_container_width=True)
+col5, col6 = st.columns(2)
+col5.plotly_chart(donut_tx, use_container_width=True)
+col6.plotly_chart(donut_vol, use_container_width=True)
 # -----------------------------------------------------------------------------------------------------------------------
 # --- Row: Transfers by Source Chain over Time ---
 st.subheader("🔄 Transfers Count by Source Chain Over Time")
