@@ -135,14 +135,14 @@ with col2:
     st.plotly_chart(fig4, use_container_width=True)
 
 # --- Row 4: Donut Charts ---------------------------------------------------------------------------------------------
+# --- محاسبه مجموع تراکنش‌ها و حجم‌ها ----------------------------------------------------------------
 total_gmp_tx = grouped['gmp_num_txs'].sum()
 total_transfers_tx = grouped['transfers_num_txs'].sum()
 
 total_gmp_vol = grouped['gmp_volume'].sum()
 total_transfers_vol = grouped['transfers_volume'].sum()
 
-
-# ساخت DataFrame برای تراکنش‌ها
+# --- ساخت DataFrame برای تراکنش‌ها --------------------------------------------------------------------
 tx_df = pd.DataFrame({
     "Service": ["GMP", "Token Transfers"],
     "Count": [total_gmp_tx, total_transfers_tx]
@@ -152,12 +152,16 @@ donut_tx = px.pie(
     tx_df,
     names="Service",
     values="Count",
+    color="Service",  # تعیین رنگ صریح برای جلوگیری از ترتیب اشتباه
     hole=0.5,
     title="Share of Total Transactions By Service",
-    color_discrete_map={"GMP": "#ff7400", "Token Transfers": "#00a1f7"}
+    color_discrete_map={
+        "GMP": "#ff7400",
+        "Token Transfers": "#00a1f7"
+    }
 )
 
-# ساخت DataFrame برای حجم
+# --- ساخت DataFrame برای حجم‌ها -----------------------------------------------------------------------
 vol_df = pd.DataFrame({
     "Service": ["GMP", "Token Transfers"],
     "Volume": [total_gmp_vol, total_transfers_vol]
@@ -167,15 +171,20 @@ donut_vol = px.pie(
     vol_df,
     names="Service",
     values="Volume",
+    color="Service",  # تعیین رنگ صریح
     hole=0.5,
     title="Share of Total Volume By Service",
-    color_discrete_map={"GMP": "#ff7400", "Token Transfers": "#00a1f7"}
+    color_discrete_map={
+        "GMP": "#ff7400",
+        "Token Transfers": "#00a1f7"
+    }
 )
 
-
+# --- نمایش دو نمودار در یک ردیف ----------------------------------------------------------------------
 col5, col6 = st.columns(2)
 col5.plotly_chart(donut_tx, use_container_width=True)
 col6.plotly_chart(donut_vol, use_container_width=True)
+
 
 # -----------------------------------------------------------------------------------------------------------------------
 # --- Row: Transfers by Source Chain over Time ---
