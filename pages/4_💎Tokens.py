@@ -914,7 +914,7 @@ def render_top5(df, metric, title, container):
     df = df.reset_index(drop=True).copy()
     df.index = emoji_index[:len(df)]
 
-    df[metric] = df[metric].apply(lambda x: f"{x:,}")
+  # --  df[metric] = df[metric].apply(lambda x: f"{x:,}")
     df = df[["Symbol", "Service", metric]]
     container.subheader(title)
     container.dataframe(df, use_container_width=True)
