@@ -136,9 +136,6 @@ with col2:
 
 # --- Row 4: Donut Charts ---------------------------------------------------------------------------------------------
 
-import pandas as pd
-import plotly.express as px
-
 tx_data = pd.DataFrame({
     'Service': ['GMP', 'Token Transfers'],
     'Count': [total_gmp_tx, total_transfers_tx]
