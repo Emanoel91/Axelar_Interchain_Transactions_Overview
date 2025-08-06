@@ -41,35 +41,26 @@ platforms = {
         "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xe6B3949F9bBF168f4E3EFc82bc8FD849868CC6d8", 
         "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0x492751eC3c57141deb205eC2da8bFcb410738630", 
         "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xDC3D8e1Abe590BCa428a8a2FC4CfDbD1AcF57Bd9", 
-        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xce16F69375520ab01377ce7B88f5BA8C48F8D666", 
-        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xdf4fFDa22270c12d0b5b3788F1669D709476111E", 
-        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xe6B3949F9bBF168f4E3EFc82bc8FD849868CC6d8", 
-        "https://api.axelarscan.io/token/transfersChart?contractAddress=0x492751eC3c57141deb205eC2da8bFcb410738630", 
-        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xDC3D8e1Abe590BCa428a8a2FC4CfDbD1AcF57Bd9" 
+        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xce16F69375520ab01377ce7B88f5BA8C48F8D666"  
     ],
     "Interchain Token Service": [
         "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xB5FB4BE02232B1bBA4dC8f81dc24C26980dE9e3C", 
         "https://api.axelarscan.io/gmp/GMPChart?contractAddress=axelar1aqcj54lzz0rk22gvqgcn8fr5tx4rzwdv5wv5j9dmnacgefvd7wzsy2j2mr"
     ],
     "Nya Bridge": [
-        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609", 
-        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609"
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609"
     ],    
     "The Junkyard": [
-        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44", 
-        "https://api.axelarscan.io/token/transfersChart?contractAddress=0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44"   
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44" 
     ],
     "Rango Exchange": [
-        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0x0ADFb7975aa7c3aD90c57AEa8FDe5E31a721E9bb", 
-        "https://api.axelarscan.io/token/transfersChart?contractAddress=0x0ADFb7975aa7c3aD90c57AEa8FDe5E31a721E9bb"
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0x0ADFb7975aa7c3aD90c57AEa8FDe5E31a721E9bb"
     ],
     "Prime Protocol": [
-        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xbe54BaFC56B468d4D20D609F0Cf17fFc56b99913", 
-        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xbe54BaFC56B468d4D20D609F0Cf17fFc56b99913"
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xbe54BaFC56B468d4D20D609F0Cf17fFc56b99913"
     ],
     "MintDAO Bridge": [
-        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56", 
-        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56"
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56"
     ]
     # اضافه کردن سایر پلتفرم‌ها مشابه بالا
 }
