@@ -62,7 +62,7 @@ platforms = {
     "MintDAO Bridge": [
         "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56"
     ]
-    # اضافه کردن سایر پلتفرم‌ها مشابه بالا
+
 }
 
 @st.cache_data(ttl=3600)
@@ -114,8 +114,11 @@ with col1:
         agg_platform,
         names='platform',
         values='total_txs',
-        hole=0.5,
         title="Total Number of Transfers By Platform"
+    )
+    fig_tx.update_traces(
+        textinfo='label+percent+value',
+        insidetextorientation='auto'
     )
     st.plotly_chart(fig_tx, use_container_width=True)
 
@@ -124,8 +127,11 @@ with col2:
         agg_platform,
         names='platform',
         values='total_volume',
-        hole=0.5,
         title="Total Volume of Transfers By Platform"
+    )
+    fig_vol.update_traces(
+        textinfo='label+percent+value',
+        insidetextorientation='auto'
     )
     st.plotly_chart(fig_vol, use_container_width=True)
 
