@@ -135,7 +135,6 @@ with col2:
     st.plotly_chart(fig4, use_container_width=True)
 
 # --- Row 4: Donut Charts ---------------------------------------------------------------------------------------------
-st.markdown("## 🍩 Share Breakdown")
 
 total_gmp_tx = grouped['gmp_num_txs'].sum()
 total_transfers_tx = grouped['transfers_num_txs'].sum()
@@ -148,7 +147,7 @@ donut_tx = px.pie(
     values=[total_gmp_tx, total_transfers_tx],
     hole=0.5,
     title="Share of Total Transactions By Service",
-    color_discrete_map={"GMP": "#ff7400", "Token Transfers": "#00a1f7"}
+    color_discrete_map={"GMP": "#000000", "Token Transfers": "#00a1f7"}
 )
 
 donut_vol = px.pie(
