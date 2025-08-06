@@ -75,30 +75,31 @@ platforms = {
 }
 
 @st.cache_data(ttl=3600)
-def fetch_data():
+def fetch_all_platform_data():
     all_data = []
     for platform, urls in platforms.items():
         for url in urls:
             try:
-                r = requests.get(url)
-                r.raise_for_status()
-                data = r.json().get('data', [])
+                res = requests.get(url)
+                res.raise_for_status()
+                data = res.json().get("data", [])
                 df = pd.DataFrame(data)
                 df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
                 df['platform'] = platform
                 all_data.append(df)
             except Exception as e:
-                st.warning(f"❌ Failed to fetch from {url}: {e}")
+                st.warning(f"⚠️ Error fetching data for {platform}: {e}")
     if all_data:
         return pd.concat(all_data, ignore_index=True)
-    return pd.DataFrame()
+    else:
+        return pd.DataFrame()
 
-df_raw = fetch_data()
+df_raw = fetch_all_platform_data()
 
-# --- Filter by date range ----------------------------------------------------------------------------------------
+# --- Filter by selected date range -------------------------------------------------------------------------------------
 df = df_raw[(df_raw['timestamp'] >= pd.to_datetime(start_date)) & (df_raw['timestamp'] <= pd.to_datetime(end_date))].copy()
 
-# --- Timeframe Grouping ------------------------------------------------------------------------------------------
+# --- Group by timeframe -----------------------------------------------------------------------------------------------
 if timeframe == "week":
     df['period'] = df['timestamp'].dt.to_period('W').apply(lambda r: r.start_time)
 elif timeframe == "month":
@@ -106,83 +107,75 @@ elif timeframe == "month":
 else:
     df['period'] = df['timestamp']
 
-# --- Aggregated for Donut Charts ----------------------------------------------------------------------------------
-agg_donut = df.groupby('platform').agg(
+# --- Aggregations for Donut Charts -------------------------------------------------------------------------------------
+agg_platform = df.groupby('platform').agg(
     total_txs=('num_txs', 'sum'),
     total_volume=('volume', 'sum')
 ).reset_index()
 
-# --- Donut Charts -------------------------------------------------------------------------------------------------
-st.markdown("### 🍩 Total Transfers Breakdown By Platform")
+# --- Donut Charts ------------------------------------------------------------------------------------------------------
+st.markdown("## 🍩 Total Transfers by Platform")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    fig_donut_tx = px.pie(
-        agg_donut,
+    fig_tx = px.pie(
+        agg_platform,
         names='platform',
         values='total_txs',
-        title="Total Number of Transfers By Platform",
-        hole=0.5
+        hole=0.5,
+        title="Total Number of Transfers By Platform"
     )
-    st.plotly_chart(fig_donut_tx, use_container_width=True)
+    st.plotly_chart(fig_tx, use_container_width=True)
 
 with col2:
-    fig_donut_volume = px.pie(
-        agg_donut,
+    fig_vol = px.pie(
+        agg_platform,
         names='platform',
         values='total_volume',
-        title="Total Volume of Transfers By Platform",
-        hole=0.5
+        hole=0.5,
+        title="Total Volume of Transfers By Platform"
     )
-    st.plotly_chart(fig_donut_volume, use_container_width=True)
+    st.plotly_chart(fig_vol, use_container_width=True)
 
-# --- Time Series Aggregation --------------------------------------------------------------------------------------
+# --- Aggregation for Time Series Bar Charts ---------------------------------------------------------------------------
 agg_time = df.groupby(['period', 'platform']).agg(
     total_txs=('num_txs', 'sum'),
     total_volume=('volume', 'sum')
 ).reset_index()
 
-# Pivot for stacked bar
+# Pivot to plot stacked bar chart
 pivot_txs = agg_time.pivot(index='period', columns='platform', values='total_txs').fillna(0)
 pivot_vol = agg_time.pivot(index='period', columns='platform', values='total_volume').fillna(0)
 
-# --- Stacked Bar Charts -------------------------------------------------------------------------------------------
-st.markdown("### 📊 Transfers Over Time By Platform")
+# --- Stacked Bar Charts -----------------------------------------------------------------------------------------------
+st.markdown("## 📊 Transfers Over Time by Platform")
 
 col3, col4 = st.columns(2)
 
 with col3:
-    fig_bar_tx = go.Figure()
+    fig_stack_tx = go.Figure()
     for platform in pivot_txs.columns:
-        fig_bar_tx.add_trace(go.Bar(
-            x=pivot_txs.index,
-            y=pivot_txs[platform],
-            name=platform
-        ))
-    fig_bar_tx.update_layout(
+        fig_stack_tx.add_trace(go.Bar(x=pivot_txs.index, y=pivot_txs[platform], name=platform))
+    fig_stack_tx.update_layout(
         barmode='stack',
         title="Number of Transfers Over Time By Platform",
         xaxis_title="Date",
-        yaxis_title="Number of Transfers"
+        yaxis_title="Transfers"
     )
-    st.plotly_chart(fig_bar_tx, use_container_width=True)
+    st.plotly_chart(fig_stack_tx, use_container_width=True)
 
 with col4:
-    fig_bar_vol = go.Figure()
+    fig_stack_vol = go.Figure()
     for platform in pivot_vol.columns:
-        fig_bar_vol.add_trace(go.Bar(
-            x=pivot_vol.index,
-            y=pivot_vol[platform],
-            name=platform
-        ))
-    fig_bar_vol.update_layout(
+        fig_stack_vol.add_trace(go.Bar(x=pivot_vol.index, y=pivot_vol[platform], name=platform))
+    fig_stack_vol.update_layout(
         barmode='stack',
         title="Volume of Transfers Over Time By Platform",
         xaxis_title="Date",
         yaxis_title="Volume ($)"
     )
-    st.plotly_chart(fig_bar_vol, use_container_width=True)
+    st.plotly_chart(fig_stack_vol, use_container_width=True)
 
 
 
