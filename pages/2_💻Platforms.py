@@ -120,6 +120,7 @@ with col1:
         textinfo='label+percent+value',
         insidetextorientation='auto'
     )
+    fig_tx.update_layout(uniformtext_minsize=10, uniformtext_mode='hide')
     st.plotly_chart(fig_tx, use_container_width=True)
 
 with col2:
