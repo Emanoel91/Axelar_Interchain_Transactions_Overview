@@ -75,16 +75,19 @@ col3.metric("💰 Total GMP Volume ($)", f"${grouped['gmp_volume'].sum():,.0f}")
 col4.metric("💸 Total Token Transfers Volume ($)", f"${grouped['transfers_volume'].sum():,.0f}")
 
 # --- Row 2: Transactions Over Time ----------------------------------------------------------------------------------
+import streamlit as st
+import plotly.graph_objects as go
+
 st.markdown("## 📈 Transactions Over Time by Service")
 
-# Stacked bar + line
+# -- Stacked bar + line
 fig1 = go.Figure()
 fig1.add_trace(go.Bar(x=grouped['period'], y=grouped['gmp_num_txs'], name='GMP', marker_color='#ff7400'))
 fig1.add_trace(go.Bar(x=grouped['period'], y=grouped['transfers_num_txs'], name='Token Transfers', marker_color='#00a1f7'))
 fig1.add_trace(go.Scatter(x=grouped['period'], y=grouped['total_txs'], name='Total', mode='lines+markers', marker_color='black'))
 fig1.update_layout(barmode='stack', title="Transactions By Service Over Time")
 
-# Normalized stacked bar
+# -- Normalized stacked bar
 df_norm_tx = grouped.copy()
 df_norm_tx['gmp_norm'] = df_norm_tx['gmp_num_txs'] / df_norm_tx['total_txs']
 df_norm_tx['transfers_norm'] = df_norm_tx['transfers_num_txs'] / df_norm_tx['total_txs']
@@ -94,8 +97,14 @@ fig2.add_trace(go.Bar(x=df_norm_tx['period'], y=df_norm_tx['gmp_norm'], name='GM
 fig2.add_trace(go.Bar(x=df_norm_tx['period'], y=df_norm_tx['transfers_norm'], name='Token Transfers', marker_color='#00a1f7'))
 fig2.update_layout(barmode='stack', title="Normalized Transactions By Service Over Time", yaxis_tickformat='%')
 
-st.plotly_chart(fig1, use_container_width=True)
-st.plotly_chart(fig2, use_container_width=True)
+col1, col2 = st.columns(2)
+
+with col1:
+    st.plotly_chart(fig1, use_container_width=True)
+
+with col2:
+    st.plotly_chart(fig2, use_container_width=True)
+
 
 # --- Row 3: Volume Over Time ----------------------------------------------------------------------------------------
 st.markdown("## 💵 Volume Over Time by Service")
