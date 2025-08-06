@@ -135,6 +135,12 @@ with col2:
     st.plotly_chart(fig4, use_container_width=True)
 
 # --- Row 4: Donut Charts ---------------------------------------------------------------------------------------------
+total_gmp_tx = grouped['gmp_num_txs'].sum()
+total_transfers_tx = grouped['transfers_num_txs'].sum()
+
+total_gmp_vol = grouped['gmp_volume'].sum()
+total_transfers_vol = grouped['transfers_volume'].sum()
+
 
 # ساخت DataFrame برای تراکنش‌ها
 tx_df = pd.DataFrame({
