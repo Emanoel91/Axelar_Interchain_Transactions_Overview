@@ -736,7 +736,7 @@ SELECT CASE
   round(sum(amount_usd)) AS "Transfers Volume",
 FROM axelar_service
 WHERE created_at::DATE >= '{start_date}' and created_at::DATE <= '{end_date}'
-AND raw_asset is not null
+AND raw_asset is not null and amount_usd is not null
 GROUP BY 1, 2
 ORDER BY 3 DESC
 limit 5
@@ -897,7 +897,7 @@ SELECT CASE
   round(sum(fee)) AS "Transfer Fees",
 FROM axelar_service
 WHERE created_at::DATE >= '{start_date}' and created_at::DATE <= '{end_date}'
-AND raw_asset is not null
+AND raw_asset is not null and fee is not null
 GROUP BY 1, 2
 ORDER BY 3 DESC
 limit 5
