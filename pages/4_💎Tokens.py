@@ -911,10 +911,13 @@ def render_top5(df, metric, title, container):
     if df.empty:
         container.warning(f"No data for {title}")
         return
+
     df = df.reset_index(drop=True).copy()
     df.index = emoji_index[:len(df)]
 
-  # --  df[metric] = df[metric].apply(lambda x: f"{x:,}")
+    df[metric] = pd.to_numeric(df[metric], errors="coerce")
+    df[metric] = df[metric].map("{:,}".format)
+
     df = df[["Symbol", "Service", metric]]
     container.subheader(title)
     container.dataframe(df, use_container_width=True)
@@ -923,4 +926,5 @@ col1, col2 = st.columns(2)
 
 render_top5(df_top_counts, "Transfers Volume", "Top 5 Tokens By Transfers Volume", col1)
 render_top5(df_top_users,  "Transfer Fees",     "Top 5 Tokens By Transfer Fees", col2)
+
 
