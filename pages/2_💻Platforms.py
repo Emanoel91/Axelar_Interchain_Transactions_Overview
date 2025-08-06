@@ -33,20 +33,6 @@ timeframe = st.selectbox("Select Time Frame", ["month", "week", "day"])
 start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 # ----------------------------------------------------------------------------------------------------------------------
-# ----------------------------------------------------------------------------------------------------------------------
-import streamlit as st
-import pandas as pd
-import requests
-import plotly.express as px
-import plotly.graph_objects as go
-
-# --- User Controls ------------------------------------------------------------------------------------------------
-st.subheader("📦 Platform Transfers Overview")
-
-timeframe = st.selectbox("Select Time Frame", ["day", "week", "month"])
-start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
-end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
-
 # --- API Definitions ----------------------------------------------------------------------------------------------
 platforms = {
     "Squid": [
