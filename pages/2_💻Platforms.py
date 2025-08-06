@@ -34,127 +34,171 @@ start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 # ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
+import streamlit as st
+import pandas as pd
+import requests
+import plotly.express as px
+import plotly.graph_objects as go
 
-# --- Load Platform Transfer Data from Dune API (Row 1,2) -------------------------------------------------------------------------
+# --- User Controls ------------------------------------------------------------------------------------------------
+st.subheader("📦 Platform Transfers Overview")
+
+timeframe = st.selectbox("Select Time Frame", ["day", "week", "month"])
+start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
+end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
+
+# --- API Definitions ----------------------------------------------------------------------------------------------
+platforms = {
+    "Squid": [
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xce16F69375520ab01377ce7B88f5BA8C48F8D666", 
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xdf4fFDa22270c12d0b5b3788F1669D709476111E",
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xe6B3949F9bBF168f4E3EFc82bc8FD849868CC6d8", 
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0x492751eC3c57141deb205eC2da8bFcb410738630", 
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xDC3D8e1Abe590BCa428a8a2FC4CfDbD1AcF57Bd9", 
+        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xce16F69375520ab01377ce7B88f5BA8C48F8D666", 
+        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xdf4fFDa22270c12d0b5b3788F1669D709476111E", 
+        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xe6B3949F9bBF168f4E3EFc82bc8FD849868CC6d8", 
+        "https://api.axelarscan.io/token/transfersChart?contractAddress=0x492751eC3c57141deb205eC2da8bFcb410738630", 
+        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xDC3D8e1Abe590BCa428a8a2FC4CfDbD1AcF57Bd9" 
+    ],
+    "Interchain Token Service": [
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xB5FB4BE02232B1bBA4dC8f81dc24C26980dE9e3C", 
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=axelar1aqcj54lzz0rk22gvqgcn8fr5tx4rzwdv5wv5j9dmnacgefvd7wzsy2j2mr"
+    ],
+    "Nya Bridge": [
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609", 
+        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609"
+        
+    "The Junkyard": [
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44", 
+        "https://api.axelarscan.io/token/transfersChart?contractAddress=0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44"   
+    ],
+    "Rango Exchange": [
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0x0ADFb7975aa7c3aD90c57AEa8FDe5E31a721E9bb", 
+        "https://api.axelarscan.io/token/transfersChart?contractAddress=0x0ADFb7975aa7c3aD90c57AEa8FDe5E31a721E9bb"
+    ],
+    "Prime Protocol": [
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xbe54BaFC56B468d4D20D609F0Cf17fFc56b99913", 
+        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xbe54BaFC56B468d4D20D609F0Cf17fFc56b99913"
+    ],
+    "MintDAO Bridge": [
+        "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56", 
+        "https://api.axelarscan.io/token/transfersChart?contractAddress=0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56"
+    ]
+    # اضافه کردن سایر پلتفرم‌ها مشابه بالا
+}
+
 @st.cache_data(ttl=3600)
-def load_platform_data():
-    url = "https://api.dune.com/api/v1/query/5581150/results?api_key=kmCBMTxWKBxn6CVgCXhwDvcFL1fBp6rO"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        df = pd.DataFrame(data["result"]["rows"])
-        df["date"] = pd.to_datetime(df["date"])
-        df["volume"] = pd.to_numeric(df["volume"], errors="coerce")
-        df["num_txs"] = pd.to_numeric(df["num_txs"], errors="coerce")
-        return df
-    else:
-        st.error(f"Failed to fetch platform data: {response.status_code}")
-        return pd.DataFrame(columns=["date", "volume", "num_txs", "platform"])
+def fetch_data():
+    all_data = []
+    for platform, urls in platforms.items():
+        for url in urls:
+            try:
+                r = requests.get(url)
+                r.raise_for_status()
+                data = r.json().get('data', [])
+                df = pd.DataFrame(data)
+                df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+                df['platform'] = platform
+                all_data.append(df)
+            except Exception as e:
+                st.warning(f"❌ Failed to fetch from {url}: {e}")
+    if all_data:
+        return pd.concat(all_data, ignore_index=True)
+    return pd.DataFrame()
 
-platform_df_raw = load_platform_data()
-platform_df = platform_df_raw[
-    (platform_df_raw["date"].dt.date >= start_date) &
-    (platform_df_raw["date"].dt.date <= end_date)
-].copy()
+df_raw = fetch_data()
 
-# --- Row 1: Platform-wise Pie Charts ------------------------------------------------------------------------------------
-st.subheader("🧮 Platform Share of Transfers and Volume")
+# --- Filter by date range ----------------------------------------------------------------------------------------
+df = df_raw[(df_raw['timestamp'] >= pd.to_datetime(start_date)) & (df_raw['timestamp'] <= pd.to_datetime(end_date))].copy()
+
+# --- Timeframe Grouping ------------------------------------------------------------------------------------------
+if timeframe == "week":
+    df['period'] = df['timestamp'].dt.to_period('W').apply(lambda r: r.start_time)
+elif timeframe == "month":
+    df['period'] = df['timestamp'].dt.to_period('M').apply(lambda r: r.start_time)
+else:
+    df['period'] = df['timestamp']
+
+# --- Aggregated for Donut Charts ----------------------------------------------------------------------------------
+agg_donut = df.groupby('platform').agg(
+    total_txs=('num_txs', 'sum'),
+    total_volume=('volume', 'sum')
+).reset_index()
+
+# --- Donut Charts -------------------------------------------------------------------------------------------------
+st.markdown("### 🍩 Total Transfers Breakdown By Platform")
 
 col1, col2 = st.columns(2)
 
-platform_colors = {
-    "Squid": "#006ac9",
-    "Interchain Token Service": "#00b3a0",
-    "MintDAO Bridge": "#ffa7a7",
-    "Prime Protocol": "#ff0000",
-    "Nya Bridge": "#ff8000",
-    "eesee.io": "#34f2a7",
-    "The Junkyard": "#62cbff",
-    "Rango Exchange": "#ffcf68"
-}
-
-def style_pie_chart(fig, title):
-    fig.update_traces(
-        textinfo='percent+label',
-        textposition='inside',
-        insidetextorientation='radial',
-        textfont_size=12
-    )
-    fig.update_layout(
-        title=title,
-        legend=dict(
-            orientation="v",
-            x=1,
-            xanchor="left",
-            y=0.5
-        )
-    )
-    return fig
-
 with col1:
-    txs_by_platform = platform_df.groupby("platform")["num_txs"].sum().reset_index()
-    fig_txs = px.pie(
-        txs_by_platform,
-        names="platform",
-        values="num_txs",
-        color="platform",
-        color_discrete_map=platform_colors
+    fig_donut_tx = px.pie(
+        agg_donut,
+        names='platform',
+        values='total_txs',
+        title="Total Number of Transfers By Platform",
+        hole=0.5
     )
-    fig_txs = style_pie_chart(fig_txs, "Transactions by Platform")
-    st.plotly_chart(fig_txs, use_container_width=True)
+    st.plotly_chart(fig_donut_tx, use_container_width=True)
 
 with col2:
-    volume_by_platform = platform_df.groupby("platform")["volume"].sum().reset_index()
-    fig_volume = px.pie(
-        volume_by_platform,
-        names="platform",
-        values="volume",
-        color="platform",
-        color_discrete_map=platform_colors
+    fig_donut_volume = px.pie(
+        agg_donut,
+        names='platform',
+        values='total_volume',
+        title="Total Volume of Transfers By Platform",
+        hole=0.5
     )
-    fig_volume = style_pie_chart(fig_volume, "Volume by Platform ($)")
-    st.plotly_chart(fig_volume, use_container_width=True)
+    st.plotly_chart(fig_donut_volume, use_container_width=True)
 
+# --- Time Series Aggregation --------------------------------------------------------------------------------------
+agg_time = df.groupby(['period', 'platform']).agg(
+    total_txs=('num_txs', 'sum'),
+    total_volume=('volume', 'sum')
+).reset_index()
 
-# --- Row 2: Time Series Stacked Bar Charts -----------------------------------------------------------------------------
-st.subheader("📈 Time Series of Transfers and Volume by Platform")
+# Pivot for stacked bar
+pivot_txs = agg_time.pivot(index='period', columns='platform', values='total_txs').fillna(0)
+pivot_vol = agg_time.pivot(index='period', columns='platform', values='total_volume').fillna(0)
 
-# Convert to desired timeframe
-platform_df["timeframe"] = platform_df["date"].dt.to_period(timeframe[0].upper()).dt.to_timestamp()
+# --- Stacked Bar Charts -------------------------------------------------------------------------------------------
+st.markdown("### 📊 Transfers Over Time By Platform")
 
-# Aggregate data
-grouped_df = platform_df.groupby(["timeframe", "platform"]).agg({
-    "num_txs": "sum",
-    "volume": "sum"
-}).reset_index()
+col3, col4 = st.columns(2)
 
-# --- Chart 1: Stacked Bar for num_txs ---
-bar_col1, bar_col2 = st.columns(2)
-
-with bar_col1:
-    fig_stack_txs = px.bar(
-        grouped_df,
-        x="timeframe",
-        y="num_txs",
-        color="platform",
-        title="Transactions Over Time by Platform",
-        labels={"num_txs": "Number of Transactions", "timeframe": "Time"}
+with col3:
+    fig_bar_tx = go.Figure()
+    for platform in pivot_txs.columns:
+        fig_bar_tx.add_trace(go.Bar(
+            x=pivot_txs.index,
+            y=pivot_txs[platform],
+            name=platform
+        ))
+    fig_bar_tx.update_layout(
+        barmode='stack',
+        title="Number of Transfers Over Time By Platform",
+        xaxis_title="Date",
+        yaxis_title="Number of Transfers"
     )
-    fig_stack_txs.update_layout(barmode='stack', xaxis_title="Time", yaxis_title="Transactions")
-    st.plotly_chart(fig_stack_txs, use_container_width=True)
+    st.plotly_chart(fig_bar_tx, use_container_width=True)
 
-# --- Chart 2: Stacked Bar for volume ---
-with bar_col2:
-    fig_stack_volume = px.bar(
-        grouped_df,
-        x="timeframe",
-        y="volume",
-        color="platform",
-        title="Volume Over Time by Platform ($)",
-        labels={"volume": "Volume ($)", "timeframe": "Time"}
+with col4:
+    fig_bar_vol = go.Figure()
+    for platform in pivot_vol.columns:
+        fig_bar_vol.add_trace(go.Bar(
+            x=pivot_vol.index,
+            y=pivot_vol[platform],
+            name=platform
+        ))
+    fig_bar_vol.update_layout(
+        barmode='stack',
+        title="Volume of Transfers Over Time By Platform",
+        xaxis_title="Date",
+        yaxis_title="Volume ($)"
     )
-    fig_stack_volume.update_layout(barmode='stack', xaxis_title="Time", yaxis_title="Volume ($)")
-    st.plotly_chart(fig_stack_volume, use_container_width=True)
+    st.plotly_chart(fig_bar_vol, use_container_width=True)
+
+
 
 # --- Dynamic SQL based on filters (Row3,4) -------------------------------------------------------------------------------------
 query = f"""
