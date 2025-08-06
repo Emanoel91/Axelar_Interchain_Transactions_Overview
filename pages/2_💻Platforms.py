@@ -54,7 +54,7 @@ platforms = {
     "Nya Bridge": [
         "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609", 
         "https://api.axelarscan.io/token/transfersChart?contractAddress=0xcbBA104B6CB4960a70E5dfc48E76C536A1f19609"
-        
+    ],    
     "The Junkyard": [
         "https://api.axelarscan.io/gmp/GMPChart?contractAddress=0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44", 
         "https://api.axelarscan.io/token/transfersChart?contractAddress=0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44"   
