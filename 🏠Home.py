@@ -124,3 +124,16 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# --- Sidebar Footer ---------------------------------------------------------------------------------------------------------------------------------------
+st.sidebar.markdown(
+    """
+    <hr style="margin-top: 30px; margin-bottom: 10px;">
+
+    <div style="text-align: center; font-size: 14px; color: gray;">
+        <strong>Powered by Axelar</strong><br>
+        Built by <a href="https://x.com/0xeman_raz" target="_blank" style="color: gray;">Eman Raz</a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
