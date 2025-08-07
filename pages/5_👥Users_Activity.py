@@ -127,8 +127,8 @@ with col1:
     fig2.add_trace(go.Scatter(x=df["Date"], y=df["Cumulative Users"], mode='lines+markers', name="Cumulative Users", yaxis="y2"))
     fig2.update_layout(
         title="Number of New Users Over Time",
-        yaxis=dict(title="New Users"),
-        yaxis2=dict(title="Cumulative Users", overlaying="y", side="right"),
+        yaxis=dict(title="Address count"),
+        yaxis2=dict(title="Address count", overlaying="y", side="right"),
         xaxis=dict(title="Date")
     )
     st.plotly_chart(fig2, use_container_width=True)
@@ -141,7 +141,7 @@ with col2:
     fig3.add_trace(go.Scatter(x=df["Date"], y=df["Average 30 Active Users"], mode='lines', name="30-Day Avg"))
     fig3.update_layout(
         title="Axelar: Dailily Average Users",
-        yaxis=dict(title="Average Users"),
+        yaxis=dict(title="Address count"),
         xaxis=dict(title="Date")
     )
     st.plotly_chart(fig3, use_container_width=True)
@@ -158,7 +158,7 @@ with col3:
         barmode="stack",
         title="New vs Recurring Users Over Time",
         xaxis_title="Date",
-        yaxis_title="Users"
+        yaxis_title="Address count"
     )
     st.plotly_chart(fig4, use_container_width=True)
 
@@ -180,7 +180,7 @@ st.subheader("📋 Axelar: Users Stats")
 st.dataframe(df)
 
 # -------------------------------------------------------------------------------------------------------------------
-# --- کوئری MAU vs DAU ---------------------------------------------------------------------------------------------
+# ---  MAU vs DAU ---------------------------------------------------------------------------------------------
 query_stickiness = f"""
 WITH DAU_u AS (
     WITH axelar_service AS (
@@ -247,8 +247,8 @@ with col1:
     fig_mau_dau.update_layout(
         title="Axelar: MAU vs Avg. DAU",
         xaxis_title="Date",
-        yaxis=dict(title="MAU"),
-        yaxis2=dict(title="Avg. DAU", overlaying="y", side="right"),
+        yaxis=dict(title="Address count"),
+        yaxis2=dict(title="Address count", overlaying="y", side="right"),
         legend=dict(orientation="h", y=1.1, x=1, xanchor='right'),
     )
     st.plotly_chart(fig_mau_dau, use_container_width=True)
