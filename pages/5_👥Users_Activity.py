@@ -179,3 +179,94 @@ with col4:
 st.subheader("📋 Axelar: Users Stats")
 st.dataframe(df)
 
+# -------------------------------------------------------------------------------------------------------------------
+# --- کوئری MAU vs DAU ---------------------------------------------------------------------------------------------
+query_stickiness = f"""
+WITH DAU_u AS (
+    WITH axelar_service AS (
+        SELECT created_at, recipient_address AS user
+        FROM axelar.axelscan.fact_transfers
+        WHERE status = 'executed' AND simplified_status = 'received'
+        UNION ALL
+        SELECT created_at, data:call.transaction.from::STRING AS user
+        FROM axelar.axelscan.fact_gmp 
+        WHERE status = 'executed' AND simplified_status = 'received'
+    )
+    SELECT date_trunc('day', created_at) AS day, COUNT(DISTINCT user) AS DAU
+    FROM axelar_service
+    WHERE created_at::date BETWEEN '{start_date}' AND '{end_date}'
+    GROUP BY 1
+),
+MAU_u AS (
+    WITH axelar_service AS (
+        SELECT created_at, recipient_address AS user
+        FROM axelar.axelscan.fact_transfers
+        WHERE status = 'executed' AND simplified_status = 'received'
+        UNION ALL
+        SELECT created_at, data:call.transaction.from::STRING AS user
+        FROM axelar.axelscan.fact_gmp 
+        WHERE status = 'executed' AND simplified_status = 'received'
+    )
+    SELECT date_trunc('MONTH', created_at) AS month, COUNT(DISTINCT user) AS MAU
+    FROM axelar_service
+    WHERE created_at::date BETWEEN '{start_date}' AND '{end_date}'
+    GROUP BY 1
+),
+mDAU AS (
+    SELECT date_trunc('month', day) AS month, ROUND(AVG(DAU)) AS "Average DAU"
+    FROM DAU_u
+    GROUP BY 1
+)
+SELECT 
+    a.month AS "Date", 
+    MAU, 
+    "Average DAU", 
+    ROUND(((100 * "Average DAU") / MAU), 2) AS "Stickiness Ratio"
+FROM mDAU a
+LEFT JOIN MAU_u b USING (month)
+ORDER BY 1 ASC
+"""
+
+df_stickiness = pd.read_sql(query_stickiness, conn)
+df_stickiness["Date"] = pd.to_datetime(df_stickiness["Date"])
+
+# --- نمودارها: MAU + Avg DAU و Stickiness Ratio --------------------------------------------------------------------
+col1, col2 = st.columns(2)
+
+with col1:
+    fig_mau_dau = go.Figure()
+    fig_mau_dau.add_bar(x=df_stickiness["Date"], y=df_stickiness["MAU"], name="MAU")
+    fig_mau_dau.add_trace(go.Scatter(
+        x=df_stickiness["Date"],
+        y=df_stickiness["Average DAU"],
+        mode="lines+markers",
+        name="Avg. DAU",
+        yaxis="y2"
+    ))
+
+    fig_mau_dau.update_layout(
+        title="Axelar: MAU vs Avg. DAU",
+        xaxis_title="Date",
+        yaxis=dict(title="MAU"),
+        yaxis2=dict(title="Avg. DAU", overlaying="y", side="right"),
+        legend=dict(orientation="h", y=1.1, x=1, xanchor='right'),
+    )
+    st.plotly_chart(fig_mau_dau, use_container_width=True)
+
+with col2:
+    fig_stickiness = px.scatter(
+        df_stickiness,
+        x="Date",
+        y="Stickiness Ratio",
+        size="Stickiness Ratio",
+        color="Stickiness Ratio",
+        title="Axelar: Stickiness Ration Over Time"
+    )
+    fig_stickiness.update_traces(mode='markers+lines')
+    fig_stickiness.update_layout(
+        yaxis_title="Stickiness Ratio (%)",
+        xaxis_title="Date",
+    )
+    st.plotly_chart(fig_stickiness, use_container_width=True)
+
+
