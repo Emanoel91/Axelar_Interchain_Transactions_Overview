@@ -88,7 +88,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# --- Sidebar Footer with Links and Logos at Bottom ---
+# --- Sidebar Footer Slightly Left-Aligned ---
 st.sidebar.markdown(
     """
     <style>
@@ -96,9 +96,10 @@ st.sidebar.markdown(
         position: fixed;
         bottom: 20px;
         width: 250px;
-        text-align: center;
         font-size: 13px;
         color: gray;
+        margin-left: 15px; /* 👈 اضافه شده برای حرکت به چپ */
+        text-align: left;  /* 👈 متن چپ‌چین شود */
     }
     .sidebar-footer img {
         width: 16px;
