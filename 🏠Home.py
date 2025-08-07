@@ -88,13 +88,22 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# --- Custom Sidebar Footer with Link, Sticky Bottom ---
+# --- Custom Sidebar Footer with Logos and Links ---
 st.sidebar.markdown(
     """
     <div style="height: 100%; display: flex; flex-direction: column; justify-content: flex-end;">
-        <div style="text-align: center; font-size: 14px; color: gray; margin-bottom: 20px;">
-            <strong>Powered by Axelar</strong><br>
-            Built by <a href="https://x.com/0xeman_raz" target="_blank" style="color: gray;">Eman Raz</a>
+        <div style="text-align: center; font-size: 13px; color: gray; margin-bottom: 20px;">
+
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 5px;">
+                <img src="https://img.cryptorank.io/coins/axelar1663924228506.png" alt="Axelar Logo" style="width:18px; height:18px;">
+                <a href="https://x.com/axelar" target="_blank" style="color: gray; text-decoration: none;"><strong>Axelar</strong></a>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <img src="https://pbs.twimg.com/profile_images/1841479747332608000/bindDGZQ_400x400.jpg" alt="Eman Raz" style="width:18px; height:18px; border-radius: 50%;">
+                <a href="https://x.com/0xeman_raz" target="_blank" style="color: gray; text-decoration: none;">Eman Raz</a>
+            </div>
+
         </div>
     </div>
     """,
