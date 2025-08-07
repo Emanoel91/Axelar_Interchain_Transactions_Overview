@@ -101,7 +101,7 @@ df["Date"] = pd.to_datetime(df["Date"])
 latest_date = df["Date"].max().date()
 latest_cumulative = int(df["Cumulative Users"].iloc[-1])
 
-st.metric(label="🧑‍💻 Total Number of Axelar Users", value=f"{latest_cumulative:,}", help=f"Up to {latest_date}")
+st.metric(label="👥 Total Number of Axelar Users", value=f"{latest_cumulative:,}", help=f"Up to {latest_date}")
 
 # --- Chart: Active Users vs Daily Change --------------------------------------------------------------------------
 fig1 = go.Figure()
