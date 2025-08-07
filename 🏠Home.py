@@ -40,14 +40,11 @@ st.markdown(
     </div>
 
     <div style="background-color: #eff2f6; padding: 15px; border-radius: 10px; border: 1px solid #eff2f6;">
-        Axelar facilitates secure cross-chain communication within the Web3 ecosystem. It empowers dApp users to seamlessly engage with any 
-        asset or application across multiple chains with a single click. Currently, Axelar supports 50 different chains.
-        Interchain dApps like Prime Protocol and Mint DAO utilize Axelar's capabilities to offer cross-chain services to users, while other 
-        protocols like Squid and Satellite, also powered by Axelar, facilitate cross-chain swaps among these 50 chains.
-        Axelar's journey began with interchain transfers, primarily introduced through Satellite. In the summer of 2022, the utilization of 
-        GMPs (General Message Passing) was introduced by Squid and other dApps such as Prime Protocol and MintDAO. This dashboard aims to provide 
-        an overview of Axelar's evolution by distinguishing between Interchain Transfers and GMPs. It also offers a comprehensive overview of Squid 
-        and Satellite, two major protocols powered by Axelar.
+        Axelar’s decentralized network underpins a diverse ecosystem of cross-chain platforms, including Squid (swaps), 
+        Rango Exchange (aggregation), MintDAO Bridge (NFTs), Prime Protocol (DeFi lending), The Junkyard (NFT gaming), and ITS (token interoperability). 
+        These platforms showcase Axelar’s role as a pivotal infrastructure for Web3 interoperability, abstracting technical complexities to deliver seamless 
+        cross-chain experiences for users and developers. From swaps and lending to NFT gaming and token management, Axelar’s GMP and ITS enable innovative 
+        applications, connecting fragmented blockchain ecosystems with unparalleled efficiency and security.  
     </div>
     """,
     unsafe_allow_html=True
