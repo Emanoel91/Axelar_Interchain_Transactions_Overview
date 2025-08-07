@@ -88,13 +88,13 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# --- Custom Sidebar Footer with Logos and Links ---
+# --- Sidebar Footer with Logos + Links (Working Version) ---
 st.sidebar.markdown(
     """
-    <div style="height: 100%; display: flex; flex-direction: column; justify-content: flex-end;">
-        <div style="text-align: center; font-size: 13px; color: gray; margin-bottom: 20px;">
+    <div style="position: fixed; bottom: 20px; width: 250px;">
+        <div style="text-align: center; font-size: 13px; color: gray;">
 
-            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 5px;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
                 <img src="https://img.cryptorank.io/coins/axelar1663924228506.png" alt="Axelar Logo" style="width:18px; height:18px;">
                 <a href="https://x.com/axelar" target="_blank" style="color: gray; text-decoration: none;"><strong>Axelar</strong></a>
             </div>
