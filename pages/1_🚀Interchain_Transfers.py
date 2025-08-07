@@ -482,3 +482,48 @@ if not user_kpis.empty:
     col3.metric(f"📆 Avg. 30 {timeframe.capitalize()} AU", f"{avg30:,}", help="30-period rolling average of active users")
 else:
     st.warning("No user KPI data found for selected time range.")
+
+
+# --- Sidebar Footer Slightly Left-Aligned ---
+st.sidebar.markdown(
+    """
+    <style>
+    .sidebar-footer {
+        position: fixed;
+        bottom: 20px;
+        width: 250px;
+        font-size: 13px;
+        color: gray;
+        margin-left: 5px; # -- MOVE LEFT
+        text-align: left;  
+    }
+    .sidebar-footer img {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+    .sidebar-footer a {
+        color: gray;
+        text-decoration: none;
+    }
+    </style>
+
+    <div class="sidebar-footer">
+        <div>
+            <a href="https://x.com/axelar" target="_blank">
+                <img src="https://img.cryptorank.io/coins/axelar1663924228506.png" alt="Axelar Logo">
+                Powered by Axelar
+            </a>
+        </div>
+        <div style="margin-top: 5px;">
+            <a href="https://x.com/0xeman_raz" target="_blank">
+                <img src="https://pbs.twimg.com/profile_images/1841479747332608000/bindDGZQ_400x400.jpg" alt="Eman Raz">
+                Built by Eman Raz
+            </a>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
