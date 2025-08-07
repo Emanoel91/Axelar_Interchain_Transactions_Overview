@@ -34,9 +34,6 @@ start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
 
 # -----------------------------------------------------------------------------------------------------------------------
-# -- import streamlit as st
-# -- import pandas as pd
-
 # --- Function to load data with a given query and apply date filter ---
 @st.cache_data(ttl=3600)
 def load_token_transfer_stats(start_date, end_date):
