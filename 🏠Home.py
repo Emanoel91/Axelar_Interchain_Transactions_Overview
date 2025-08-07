@@ -88,24 +88,45 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# --- Sidebar Footer Fixed at Bottom ---
-st.markdown(
+# --- Sidebar Footer with Links and Logos at Bottom ---
+st.sidebar.markdown(
     """
     <style>
-    /* Position footer at bottom of sidebar */
-    [data-testid="stSidebar"]::after {
-        content: "Powered by Axelar\\A Built by Eman Raz";
-        white-space: pre-line;
-        display: block;
-        position: absolute;
+    .sidebar-footer {
+        position: fixed;
         bottom: 20px;
-        width: 100%;
+        width: 250px;
         text-align: center;
-        font-size: 14px;
+        font-size: 13px;
         color: gray;
     }
+    .sidebar-footer img {
+        width: 16px;
+        height: 16px;
+        vertical-align: middle;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+    .sidebar-footer a {
+        color: gray;
+        text-decoration: none;
+    }
     </style>
+
+    <div class="sidebar-footer">
+        <div>
+            <a href="https://x.com/axelar" target="_blank">
+                <img src="https://img.cryptorank.io/coins/axelar1663924228506.png" alt="Axelar Logo">
+                Powered by Axelar
+            </a>
+        </div>
+        <div style="margin-top: 5px;">
+            <a href="https://x.com/0xeman_raz" target="_blank">
+                <img src="https://pbs.twimg.com/profile_images/1841479747332608000/bindDGZQ_400x400.jpg" alt="Eman Raz">
+                Built by Eman Raz
+            </a>
+        </div>
+    </div>
     """,
     unsafe_allow_html=True
 )
-
