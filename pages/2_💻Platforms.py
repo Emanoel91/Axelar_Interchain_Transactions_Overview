@@ -192,7 +192,7 @@ with col4:
 
 
 # --- Dynamic SQL based on filters (Row3,4) -------------------------------------------------------------------------------------
-@st.cache_data(ttl=3600)
+
 query = f"""
 with axelar_services as (
 select created_at, data:send:amount * data:link:price as amount, recipient_address as user, 
