@@ -32,3 +32,150 @@ conn = snowflake.connector.connect(
 timeframe = st.selectbox("Select Time Frame", ["month", "week", "day"])
 start_date = st.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.date_input("End Date", value=pd.to_datetime("2025-07-31"))
+
+# --- Build SQL Query ---------------------------------------------------------------------------------------------
+date_trunc_level = timeframe.upper()  # Converts to MONTH, WEEK, or DAY
+
+query = f"""
+WITH table1 AS (
+    WITH axelar_service AS (
+        SELECT created_at, recipient_address AS user
+        FROM axelar.axelscan.fact_transfers
+        WHERE status = 'executed' AND simplified_status = 'received'
+        UNION ALL
+        SELECT created_at, data:call.transaction.from::STRING AS user
+        FROM axelar.axelscan.fact_gmp 
+        WHERE status = 'executed' AND simplified_status = 'received'
+    )
+    SELECT date_trunc('{timeframe}', created_at) AS "Date", COUNT(DISTINCT user) AS "Active Users"
+    FROM axelar_service
+    WHERE created_at::date BETWEEN '{start_date}' AND '{end_date}'
+    GROUP BY 1
+),
+table2 AS (
+    WITH tab1 AS (
+        WITH axelar_service AS (
+            SELECT created_at, recipient_address AS user
+            FROM axelar.axelscan.fact_transfers
+            WHERE status = 'executed' AND simplified_status = 'received'
+            UNION ALL
+            SELECT created_at, data:call.transaction.from::STRING AS user
+            FROM axelar.axelscan.fact_gmp 
+            WHERE status = 'executed' AND simplified_status = 'received'
+        )
+        SELECT user, MIN(created_at::date) AS first_date
+        FROM axelar_service
+        GROUP BY 1
+    )
+    SELECT date_trunc('{timeframe}', first_date) AS "Date", COUNT(DISTINCT user) AS "New Users"
+    FROM tab1
+    WHERE first_date BETWEEN '{start_date}' AND '{end_date}'
+    GROUP BY 1
+)
+SELECT 
+    table1."Date" AS "Date",
+    "Active Users", 
+    COALESCE("New Users", 0) AS "Number of New Users",
+    ROUND(AVG("Active Users") OVER (ORDER BY table1."Date")) AS "Avg Active Users Over Time",
+    IFF("Active Users" > LAG("Active Users") OVER (ORDER BY table1."Date"), '🟢', 
+        IFF("Active Users" = LAG("Active Users") OVER (ORDER BY table1."Date"), '⚪', '🔴')) AS "Change",
+    (("Active Users" - LAG("Active Users") OVER (ORDER BY table1."Date")) / NULLIF(LAG("Active Users") OVER (ORDER BY table1."Date"), 0)) * 100 AS "Daily Change Active Users",
+    SUM("Number of New Users") OVER (ORDER BY table1."Date") AS "Cumulative Users",
+    ROUND(AVG("Number of New Users") OVER (ORDER BY table1."Date" ROWS BETWEEN 7 PRECEDING AND CURRENT ROW)) AS "Average 7 New Users",
+    ROUND(AVG("Number of New Users") OVER (ORDER BY table1."Date" ROWS BETWEEN 30 PRECEDING AND CURRENT ROW)) AS "Average 30 New Users",
+    "Active Users" - "Number of New Users" AS "Number of Recurring Users",
+    ROUND(100 * "Number of New Users" / NULLIF("Active Users", 0), 2) AS "New Users Percentage",
+    ROUND(100 * ("Active Users" - "Number of New Users") / NULLIF("Active Users", 0), 2) AS "Recurring Users Percentage",
+    ROUND(AVG("Active Users") OVER (ORDER BY table1."Date" ROWS BETWEEN 7 PRECEDING AND CURRENT ROW)) AS "Average 7 Active Users",
+    ROUND(AVG("Active Users") OVER (ORDER BY table1."Date" ROWS BETWEEN 30 PRECEDING AND CURRENT ROW)) AS "Average 30 Active Users"
+FROM table1
+LEFT JOIN table2 ON table1."Date" = table2."Date"
+ORDER BY 1 ASC
+"""
+
+# --- Run Query & Load Data ------------------------------------------------------------------------------------------
+df = pd.read_sql(query, conn)
+df["Date"] = pd.to_datetime(df["Date"])
+
+# --- KPI ------------------------------------------------------------------------------------------------------------
+latest_date = df["Date"].max().date()
+latest_cumulative = int(df["Cumulative Users"].iloc[-1])
+
+st.metric(label="🧑‍💻 Total Number of Axelar Users", value=f"{latest_cumulative:,}", help=f"Up to {latest_date}")
+
+# --- Chart: Active Users vs Daily Change --------------------------------------------------------------------------
+fig1 = go.Figure()
+fig1.add_bar(x=df["Date"], y=df["Active Users"], name="Active Users")
+fig1.add_trace(go.Scatter(x=df["Date"], y=df["Daily Change Active Users"], mode='lines+markers', name="Change %", yaxis="y2"))
+
+fig1.update_layout(
+    title="Axelar: DAU (Change %)",
+    yaxis=dict(title="Active Users"),
+    yaxis2=dict(title="Change (%)", overlaying="y", side="right"),
+    xaxis=dict(title="Date"),
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+)
+st.plotly_chart(fig1, use_container_width=True)
+
+# --- Row of Two Charts -------------------------------------------------------------------------------------------
+col1, col2 = st.columns(2)
+
+# Chart 1: New Users + Cumulative
+with col1:
+    fig2 = go.Figure()
+    fig2.add_bar(x=df["Date"], y=df["Number of New Users"], name="New Users")
+    fig2.add_trace(go.Scatter(x=df["Date"], y=df["Cumulative Users"], mode='lines+markers', name="Cumulative Users", yaxis="y2"))
+    fig2.update_layout(
+        title="Number of New Users Over Time",
+        yaxis=dict(title="New Users"),
+        yaxis2=dict(title="Cumulative Users", overlaying="y", side="right"),
+        xaxis=dict(title="Date")
+    )
+    st.plotly_chart(fig2, use_container_width=True)
+
+# Chart 2: Daily Avg Users
+with col2:
+    fig3 = go.Figure()
+    fig3.add_trace(go.Scatter(x=df["Date"], y=df["Avg Active Users Over Time"], mode='lines', name="All-Time Avg"))
+    fig3.add_trace(go.Scatter(x=df["Date"], y=df["Average 7 Active Users"], mode='lines', name="7-Day Avg"))
+    fig3.add_trace(go.Scatter(x=df["Date"], y=df["Average 30 Active Users"], mode='lines', name="30-Day Avg"))
+    fig3.update_layout(
+        title="Axelar: Dailily Average Users",
+        yaxis=dict(title="Average Users"),
+        xaxis=dict(title="Date")
+    )
+    st.plotly_chart(fig3, use_container_width=True)
+
+# --- Row of Two More Charts -------------------------------------------------------------------------------------
+col3, col4 = st.columns(2)
+
+# Chart 3: New vs Recurring Users
+with col3:
+    fig4 = go.Figure()
+    fig4.add_bar(x=df["Date"], y=df["Number of New Users"], name="New Users")
+    fig4.add_bar(x=df["Date"], y=df["Number of Recurring Users"], name="Recurring Users")
+    fig4.update_layout(
+        barmode="stack",
+        title="New vs Recurring Users Over Time",
+        xaxis_title="Date",
+        yaxis_title="Users"
+    )
+    st.plotly_chart(fig4, use_container_width=True)
+
+# Chart 4: Normalized % Chart
+with col4:
+    fig5 = go.Figure()
+    fig5.add_trace(go.Scatter(x=df["Date"], y=df["New Users Percentage"], stackgroup="one", name="New Users %"))
+    fig5.add_trace(go.Scatter(x=df["Date"], y=df["Recurring Users Percentage"], stackgroup="one", name="Recurring Users %"))
+    fig5.update_layout(
+        title="New and Recurring Users Over Time (%Normalized)",
+        xaxis_title="Date",
+        yaxis_title="Percentage",
+        yaxis=dict(ticksuffix="%")
+    )
+    st.plotly_chart(fig5, use_container_width=True)
+
+# --- Final Table --------------------------------------------------------------------------------------------------
+st.subheader("📋 Axelar: Users Stats")
+st.dataframe(df)
+
