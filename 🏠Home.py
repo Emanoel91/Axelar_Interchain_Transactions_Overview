@@ -98,7 +98,7 @@ st.sidebar.markdown(
         width: 250px;
         font-size: 13px;
         color: gray;
-        margin-left: 15px; /* 👈 اضافه شده برای حرکت به چپ */
+        margin-left: 20px; /* 👈 اضافه شده برای حرکت به چپ */
         text-align: left;  /* 👈 متن چپ‌چین شود */
     }
     .sidebar-footer img {
