@@ -109,8 +109,8 @@ fig1.add_bar(x=df["Date"], y=df["Active Users"], name="Active Users")
 fig1.add_trace(go.Scatter(x=df["Date"], y=df["Daily Change Active Users"], mode='lines+markers', name="Change %", yaxis="y2"))
 
 fig1.update_layout(
-    title="Axelar: DAU (Change %)",
-    yaxis=dict(title="Active Users"),
+    title="Axelar: Active Users Over Time (Change %)",
+    yaxis=dict(title="Address count"),
     yaxis2=dict(title="Change (%)", overlaying="y", side="right"),
     xaxis=dict(title="Date"),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
