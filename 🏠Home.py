@@ -53,43 +53,6 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# --- Info Box2 ---
-st.markdown(
-    """
-    <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">
-        🧫Method
-    </div>
-
-    <div style="background-color: #eff2f6; padding: 15px; border-radius: 10px; border: 1px solid #eff2f6;">
-        In this dashboard, we first provide an overview of Axelar performance, including transactions, blocks, and users. Then, 
-        we dive into specific transaction types, namely interchain transactions. These transactions can be used exclusively for 
-        token transfers or as general message passing (GMPs), which have a general use.
-        Focusing on interchain token transfers and general message passing, we distinguish between the Satellite and Squid routers, 
-        which facilitate interchain transfers: Satellite utilizes interchain transfers, and Squid utilizes GMPs.
-        Finally, we focus on these two protocols and provide a comprehensive comparative analysis of them on different dimensions, 
-        such as users and volume.
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-# --- Info Box3 ---
-st.markdown(
-    """
-    <div style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">
-        🔰Limitations
-    </div>
-
-    <div style="background-color: #eff2f6; padding: 15px; border-radius: 10px; border: 1px solid #eff2f6;">
-        Axelar's integrations extend to over 50 chains, but not all of them are supported by data providers. This dashboard relies on Flipside's 
-        data, which covers nearly all of the prominent EVM chains. Consequently, the analysis is centered around the top supported chains by 
-        activity, including Ethereum, Binance, Arbitrum, Polygon, Optimism, Base, and Avalanche. All interchain transfers and GMPs sent from these 
-        chains have been included in this analysis.
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
 # --- Reference Info ---
 st.markdown(
     """
